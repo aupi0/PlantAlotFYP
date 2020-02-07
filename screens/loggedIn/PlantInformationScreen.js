@@ -5,7 +5,6 @@ import { FlatList } from 'react-native-gesture-handler';
 const PlantInformationScreen = props => {
     return <View style={styles.screen}>
         <Text>PlantInfoScreen</Text>
-        <FlatList></FlatList>
     </View>
 };
 
