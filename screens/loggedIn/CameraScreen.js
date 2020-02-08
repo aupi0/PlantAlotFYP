@@ -94,7 +94,7 @@ const ImageTakerScreen = props => {
     );
   } else {
     try {
-      await dispatch(plantIDActions.identifyPlant(photo, 10, 20));
+      dispatch(plantIDActions.identifyPlant(photo, 10, 20));
       props.navigation.navigate("PlantInformation");
     } catch (err) {
       setError(err.message);
