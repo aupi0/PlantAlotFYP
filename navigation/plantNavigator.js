@@ -9,24 +9,42 @@ import LeaderBoardScreen from "../screens/loggedIn/LeaderBoardScreen";
 import CameraScreen from "../screens/loggedIn/CameraScreen";
 import PlantInformationScreen from "../screens/loggedIn/PlantInformationScreen";
 import AuthScreen from "../screens/anonymousUser/AuthScreen";
-import Colors from "../constants/Colors";
+import StartupScreen from "../screens/StartupScreen";
+import Colours from "../constants/Colours";
+import * as authActions from "../store/actions/auth";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { useDispatch } from "react-redux";
+
+const defaultNavOptions = {
+  headerStyle: {
+    backgroundColor: ""
+  },
+  headerTitleStyle: {
+    //fontFamily: FONT_NAME
+  },
+  headerBackTitleStyle: {
+    //fontFamily: FONT_NAME
+  },
+  headerTintColor: Colours.primary
+};
 
 const PlantStackNavigator = createStackNavigator(
   {
     LeaderBoard: LeaderBoardScreen,
     Camera: CameraScreen,
-    PlantInformation: PlantInformationScreen,
+    PlantInformation: PlantInformationScreen
   },
   {
-    defaultNavigationOptions: {
-      headerStyle: {
-        backgroundColor: Colors.primary
-      },
-      headerTitleStyle: {
-        textAlign: "center"
-      },
-      headerTintColor: "white"
-    }
+    navigationOptions: {
+      /*drawerIcon: drawerConfig => (
+        <Ionicons
+          name='ios-cart'
+          size={23}
+          color={drawerConfig.tintColor}
+        />
+      )*/
+    },
+    defaultNavigationOptions: defaultNavOptions
   }
 );
 
@@ -56,33 +74,54 @@ const PlantTabNavigator = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      activeTintColor: Colors.primary
+      activeTintColor: Colours.primary
     }
   }
 );
 
-const PlantDrawNavigator = createDrawerNavigator({
+const PlantDrawNavigator = createDrawerNavigator(
+  {
   LeaderBoard: PlantTabNavigator,
   PlantInformation: PlantInformationScreen
-});
-
-const AuthNavigator = createStackNavigator({
-  Auth: AuthScreen
-}, {
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: Colors.primary
+  },
+  {
+    contentOptions: {
+      activeTintColor: Colors.primary
     },
-    headerTintColor: 'white'
+    contentComponent: props => {
+      const dispatch = useDispatch();
+      return (
+        <View style={{ flex: 1, paddingTop: 20 }}>
+          <SafeAreaView forceInset={{ top: 'always', horizontal: 'never' }}>
+            <DrawerItems {...props} />
+            <Button
+              title="Logout"
+              color={Colors.primary}
+              onPress={() => {
+                dispatch(authActions.logout());
+                props.navigation.navigate('Auth');
+              }}
+            />
+          </SafeAreaView>
+        </View>
+      );
+    }
   }
-});
+);
+
+const AuthNavigator = createStackNavigator(
+  {
+    Auth: AuthScreen
+  },
+  {
+    defaultNavigationOptions: defaultNavOptions
+  }
+);
 
 const PlantLoginNavigator = createSwitchNavigator({
+  Startup: StartupScreen,
   Auth: AuthNavigator,
   Plant: PlantDrawNavigator
 });
-
-
-
 
 export default createAppContainer(PlantLoginNavigator);

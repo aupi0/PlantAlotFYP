@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 
 import Card from "../../components/UI/Card";
 import Input from "../../components/UI/Input";
-import Colors from "../../constants/Colors";
+import Colors from "../../constants/Colours";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as authActions from "../../store/actions/auth";
 
@@ -45,7 +45,7 @@ const AuthScreen = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isRegister, setIsRegister] = useState(false);
-  //const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const loginHandler = () => {
     /*dispatch(
