@@ -2,8 +2,10 @@ import React from "react";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
-import { createDrawerNavigator } from "react-navigation-drawer";
+import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
+import { SafeAreaView, Button, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
 
 import LeaderBoardScreen from "../screens/loggedIn/LeaderBoardScreen";
 import CameraScreen from "../screens/loggedIn/CameraScreen";
@@ -12,8 +14,6 @@ import AuthScreen from "../screens/anonymousUser/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Colours from "../constants/Colours";
 import * as authActions from "../store/actions/auth";
-import { Colors } from "react-native/Libraries/NewAppScreen";
-import { useDispatch } from "react-redux";
 
 const defaultNavOptions = {
   headerStyle: {
@@ -81,25 +81,25 @@ const PlantTabNavigator = createBottomTabNavigator(
 
 const PlantDrawNavigator = createDrawerNavigator(
   {
-  LeaderBoard: PlantTabNavigator,
-  PlantInformation: PlantInformationScreen
+    LeaderBoard: PlantTabNavigator,
+    PlantInformation: PlantInformationScreen
   },
   {
     contentOptions: {
-      activeTintColor: Colors.primary
+      activeTintColor: Colours.primary
     },
     contentComponent: props => {
       const dispatch = useDispatch();
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
-          <SafeAreaView forceInset={{ top: 'always', horizontal: 'never' }}>
+          <SafeAreaView forceInset={{ top: "always", horizontal: "never" }}>
             <DrawerItems {...props} />
             <Button
               title="Logout"
-              color={Colors.primary}
+              color={Colours.primary}
               onPress={() => {
                 dispatch(authActions.logout());
-                props.navigation.navigate('Auth');
+                props.navigation.navigate("Auth");
               }}
             />
           </SafeAreaView>

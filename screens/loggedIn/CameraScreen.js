@@ -15,19 +15,33 @@ import { Ionicons } from "@expo/vector-icons";
 import * as plantIDActions from "../../store/actions/plantID";
 import PlantInformationScreen from "./PlantInformationScreen";
 
-const ImageTakerScreen = props => {
+const CameraScreen = props => {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
-  const [photoTaken, setPhotoTaken] = useState(false);
   const [error, setError] = useState();
   const dispatch = useDispatch();
 
   const photo = async () => {
+    let SavedPhoto;
     if (this.camera) {
-      let photo = await this.camera.takePictureAsync();
-      setPhotoTaken(photoTaken = true);
+      Savedphoto = await this.camera.takePictureAsync({
+        base64: true
+      });
+      try {
+        dispatch(plantIDActions.identifyPlant(SavedPhoto, 10, 20));
+        props.navigation.navigate("PlantInformation");
+      } catch (err) {
+        setError(err.message);
+        console.log(err.message);
+      }
     }
   };
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert("An Error Occurred!", error, [{ text: "Okay" }]);
+    }
+  }, [error]);
 
   useEffect(() => {
     (async () => {
@@ -51,58 +65,49 @@ const ImageTakerScreen = props => {
       </View>
     );
   }
-  if (photoTaken == false) {
-    return (
-      <View style={styles.flex}>
-        <Camera
-          style={styles.flex}
-          type={type}
-          ref={ref => {
-            this.camera = ref;
-          }}
-        >
-          <View style={styles.touchableContainer}>
-            <TouchableOpacity
-              style={styles.close}
-              onPress={() => {
-                props.navigation.navigate("LeaderBoard");
-              }}
-            >
-              <Ionicons name="md-close" style={styles.icons} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.touchable} onPress={() => {}}>
-              <Text style={styles.icons}></Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.touchable} onPress={photo}>
-              <Ionicons name="md-camera" style={styles.icons} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.touchable}
-              onPress={() => {
-                setType(
-                  type === Camera.Constants.Type.back
-                    ? Camera.Constants.Type.front
-                    : Camera.Constants.Type.back
-                );
-              }}
-            >
-              <Ionicons name="md-reverse-camera" style={styles.icons} />
-            </TouchableOpacity>
-          </View>
-        </Camera>
-      </View>
-    );
-  } else {
-    try {
-      dispatch(plantIDActions.identifyPlant(photo, 10, 20));
-      props.navigation.navigate("PlantInformation");
-    } catch (err) {
-      setError(err.message);
-    }
-  }
+  return (
+    <View style={styles.flex}>
+      <Camera
+        style={styles.flex}
+        type={type}
+        ref={ref => {
+          this.camera = ref;
+        }}
+      >
+        <View style={styles.touchableContainer}>
+          <TouchableOpacity
+            style={styles.close}
+            onPress={() => {
+              props.navigation.navigate("LeaderBoard");
+            }}
+          >
+            <Ionicons name="md-close" style={styles.icons} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.touchable} onPress={() => {}}>
+            <Text style={styles.icons}></Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.touchable} onPress={photo}>
+            <Ionicons name="md-camera" style={styles.icons} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.touchable}
+            onPress={() => {
+              setType(
+                type === Camera.Constants.Type.back
+                  ? Camera.Constants.Type.front
+                  : Camera.Constants.Type.back
+              );
+            }}
+          >
+            <Ionicons name="md-reverse-camera" style={styles.icons} />
+          </TouchableOpacity>
+        </View>
+      </Camera>
+    </View>
+  );
 };
 
-ImageTakerScreen.navigationOptions = {
+CameraScreen.navigationOptions = {
   headerTitle: "Camera"
 };
 
@@ -138,4 +143,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default ImageTakerScreen;
+export default CameraScreen;

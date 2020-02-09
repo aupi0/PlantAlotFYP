@@ -23,3 +23,13 @@ export default function App() {
     </Provider>
   );
 }
+
+//TODO: STORE PLANT RESULTS
+//TODO: RETIREVE PLAYER SCORES
+//TODO: ADD LOCATION TO PLANT IDENTIFICATIONS
+
+//Potential extensions
+//Friend list, score amonst friends
+//was this your plant? y n
+//If not this plant was it this one?
+//other peoples profiles, their score and plants they have found
