@@ -1,23 +1,26 @@
-import React, { useState, useReducer, useCallback } from "react";
+import React, { useState, useReducer, useCallback, useEffect } from "react";
 import {
   View,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Button,
-  Text
+  Text,
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
 
 import Card from "../../components/UI/Card";
 import Input from "../../components/UI/Input";
-import Colors from "../../constants/Colors";
+import Colors from "../../constants/Colours";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as authActions from "../../store/actions/auth";
 
 const FORM_INPUT_UPDATE = "FORM_INPUT_UPDATE";
 
+//ADD VALIDATION TO ENSURE PASSWORDS MATCH
 const formReducer = (state, action) => {
   if (action.type === FORM_INPUT_UPDATE) {
     const updatedValues = {
@@ -45,29 +48,55 @@ const AuthScreen = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isRegister, setIsRegister] = useState(false);
-  //const dispatch = useDispatch();
-
-  const loginHandler = () => {
-    /*dispatch(
-      authActions.login(
-        formState.inputValues.username,
-        formState.inputValues.password
-      )
-    );*/
-    props.navigation.navigate("LeaderBoard");
-  };
+  const dispatch = useDispatch();
 
   const [formState, dispatchFormState] = useReducer(formReducer, {
     inputValues: {
-      username: "",
+      email: "",
       password: ""
     },
     inputValidities: {
-      username: false,
+      email: false,
       password: false
     },
     formIsValid: false
   });
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert("An Error Occurred!", error, [{ text: "Okay" }]);
+    }
+  }, [error]);
+
+  const authHandler = async () => {
+    props.navigation.navigate("LeaderBoard");
+    /*let action;
+    if (isRegister) {
+      action = authActions.register(
+        formState.inputValues.email,
+        formState.inputValues.password,
+        formState.inputValues.confirmPassword
+      );
+    } else {
+      action = authActions.login(
+        formState.inputValues.email,
+        formState.inputValues.password
+      );
+    }
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(action);
+      if (isRegister) {
+        setIsRegister(false);
+      } else {
+        props.navigation.navigate("LeaderBoard");
+      }
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+    }*/
+  };
 
   const inputChanceHandler = useCallback(
     (inputIdentifier, inputValue, inputValidity) => {
@@ -98,16 +127,6 @@ const AuthScreen = props => {
           <ScrollView>
             {isRegister ? (
               <View>
-                <Input
-                  id="username"
-                  label="Username"
-                  keyboardType="default"
-                  required
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Username."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
                 <Input
                   id="email"
                   label="E-mail"
@@ -147,12 +166,13 @@ const AuthScreen = props => {
             ) : (
               <View>
                 <Input
-                  id="username"
-                  label="Username"
-                  keyboardType="default"
+                  id="email"
+                  label="E-mail"
+                  keyboardType="email-address"
                   required
+                  email
                   autoCapitalize="none"
-                  errorText="Please enter a valid Username."
+                  errorText="Please enter a valid Email Address."
                   onInputChange={inputChanceHandler}
                   initialValue=""
                 />
@@ -174,15 +194,23 @@ const AuthScreen = props => {
               {isLoading ? (
                 <ActivityIndicator size="small" />
               ) : (
-                <Button title={isRegister ? 'Register' : 'Login'} color="green" onPress={loginHandler} />
+                <Button
+                  title={isRegister ? "Register" : "Login"}
+                  color="green"
+                  onPress={authHandler}
+                />
               )}
             </View>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={() => {
+              <TouchableOpacity
+                onPress={() => {
                   setIsRegister(isRegister ? false : true);
-              }}>
+                }}
+              >
                 <View style={styles.secondButtonContainer}>
-                  <Text style={styles.secondButton}>Switch to {isRegister ? 'Login' : 'Registration'}</Text>
+                  <Text style={styles.secondButton}>
+                    Switch to {isRegister ? "Login" : "Registration"}
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
