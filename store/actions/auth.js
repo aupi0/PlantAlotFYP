@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native'
+import { AsyncStorage } from "react-native";
 
 export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
@@ -13,34 +13,39 @@ export const authenticate = (userId, token, expiryTime) => {
   };
 };
 
-export const register = (email, password, confirmPassword) => {
+export const register = (name, email, password, confirmPassword) => {
   if (password != confirmPassword) {
     message = "Passwords do not Match!";
     throw new Error(message);
   } else {
     return async dispatch => {
-      const response = await fetch("LINK TO REGISTER", {
+      const response = await fetch("http://api.sherlock.uk:5000/register", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          returnSecureToken: true
-        })
+          "Content-Type": "application/json",
+          name: name,
+          emailAddress: email,
+          password: password
+        }
       });
-  
+
       if (!response.ok) {
-        const errorResData = await response.json();
-        const errorId = errorResData.error.message;
         let message = "Something went wrong!";
-        if (errorId === "EMAIL_EXISTS") {
-          message = "This email exists already!";
+        if (response.status == 500) {
+          const errorResData = await response.text();
+          console.log(errorResData);
+          message = "Internal Server Error"
+        } else {
+          const errorResData = await response.json();
+          console.log(errorResData);
+          const errorId = errorResData.msg;
+          if (errorId === "User already registered") {
+            message = "This email exists already";
+          }
         }
         throw new Error(message);
       }
-  
+
       const resData = await response.json();
       console.log(resData);
     };
@@ -48,34 +53,38 @@ export const register = (email, password, confirmPassword) => {
 };
 
 export const login = (email, password) => {
+  console.log(email);
+  console.log(password);
   return async dispatch => {
-    const response = await fetch("LINK HERE", {
+    const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-        returnSecureToken: true
-      })
+        "Content-Type": "application/json",
+        emailAddress: email,
+        password: password
+      }
     });
 
     if (!response.ok) {
-      const errorResData = await response.json();
-      const errorId = errorResData.error.message;
       let message = "Something went wrong!";
-      if (errorId === "EMAIL_NOT_FOUND") {
-        message = "This email could not be found!";
-      } else if (errorId === "INVALID_PASSWORD") {
-        message = "This password is not valid!";
+      if (response.status == 500) {
+        const errorResData = await response.text();
+        console.log(errorResData);
+        message = "Internal Server Error"
+      } else {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        const errorId = errorResData.msg;
+        if (errorId === "Incorrect user name or password") {
+          message = "Incorrect user name or password";
+        }
       }
       throw new Error(message);
     }
 
     const resData = await response.json();
     console.log(resData);
-    dispatch(
+    /*dispatch(
       authenticate(
         resData.localId,
         resData.idToken,
@@ -85,7 +94,7 @@ export const login = (email, password) => {
     const expirationDate = new Date(
       new Date().getTime() + parseInt(resData.expiresIn) * 1000
     );
-    saveDataToStorage(resData.idToken, resData.localId, expirationDate);
+    saveDataToStorage(resData.idToken, resData.localId, expirationDate);*/
   };
 };
 
