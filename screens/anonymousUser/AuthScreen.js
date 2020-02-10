@@ -52,50 +52,78 @@ const AuthScreen = props => {
 
   const [formState, dispatchFormState] = useReducer(formReducer, {
     inputValues: {
+      name: "",
       email: "",
-      password: ""
+      password: "",
+      confirmPassword: ""
     },
     inputValidities: {
+      name: false,
       email: false,
-      password: false
+      password: false,
+      confirmPassword: false
     },
     formIsValid: false
   });
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (error) {
       Alert.alert("An Error Occurred!", error, [{ text: "Okay" }]);
     }
-  }, [error]);
+  }, [error]);*/
 
   const authHandler = async () => {
-    props.navigation.navigate("LeaderBoard");
-    /*let action;
-    if (isRegister) {
-      action = authActions.register(
-        formState.inputValues.email,
-        formState.inputValues.password,
-        formState.inputValues.confirmPassword
-      );
-    } else {
-      action = authActions.login(
-        formState.inputValues.email,
-        formState.inputValues.password
-      );
-    }
+    //props.navigation.navigate("LeaderBoard");
     setError(null);
-    setIsLoading(true);
-    try {
-      await dispatch(action);
-      if (isRegister) {
-        setIsRegister(false);
+    let action;
+    console.log(error);
+    console.log(formState);
+    if (isRegister) {
+      if (!formState.inputValidities.name) {
+        setError("Please Enter a Valid Name");
+      } else if (!formState.inputValidities.email) {
+        setError("Please Enter a Valid Email");
+      } else if (!formState.inputValidities.password) {
+        setError("Please Enter a Valid Password");
+      } else if (
+        formState.inputValues.password != formState.inputValues.confirmPassword
+      ) {
+        setError("Passwords do not Match");
       } else {
-        props.navigation.navigate("LeaderBoard");
+        action = authActions.register(
+          formState.inputValues.name,
+          formState.inputValues.email,
+          formState.inputValues.password,
+          formState.inputValues.confirmPassword
+        );
       }
-    } catch (err) {
-      setError(err.message);
-      setIsLoading(false);
-    }*/
+    } else {
+      if (!formState.inputValidities.email) {
+        setError("Please Enter a Valid Email");
+      } else if (!formState.inputValidities.password) {
+        setError("Please Enter a Valid Password");
+      } else {
+        action = authActions.login(
+          formState.inputValues.email,
+          formState.inputValues.password
+        );
+      }
+    }
+    if (!error) {
+      setIsLoading(true);
+      try {
+        await dispatch(action);
+        if (isRegister) {
+          setIsRegister(false);
+        } else {
+          props.navigation.navigate("LeaderBoard");
+        }
+      } catch (err) {
+        console.log(err);
+        setError(err.message);
+        setIsLoading(false);
+      }
+    }
   };
 
   const inputChanceHandler = useCallback(
@@ -127,6 +155,18 @@ const AuthScreen = props => {
           <ScrollView>
             {isRegister ? (
               <View>
+                {error != null ? (<Text style={styles.error}>error</Text>) : (<Text></Text>)}
+                <Input
+                  id="name"
+                  label="Name"
+                  keyboardType="default"
+                  required
+                  autoCapitalize="words"
+                  minLength={1}
+                  errorText="Please enter a valid Name."
+                  onInputChange={inputChanceHandler}
+                  initialValue=""
+                />
                 <Input
                   id="email"
                   label="E-mail"
@@ -240,6 +280,11 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     maxHeight: 500,
     padding: 25
+  },
+  error: {
+    color: "red",
+    fontSize: 18,
+    fontWeight: "bold"
   },
   buttonContainer: {
     marginTop: 10
