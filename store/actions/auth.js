@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native'
+import { AsyncStorage } from "react-native";
 
 export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
@@ -23,22 +23,29 @@ export const register = (name, email, password, confirmPassword) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "name": name,
-          "emailAddress": email,
-          "password": password
+          name: name,
+          emailAddress: email,
+          password: password
         }
       });
-  
+
       if (!response.ok) {
-        const errorResData = await response.json();
-        const errorId = errorResData.error.message;
         let message = "Something went wrong!";
-        if (errorId === "User already registered") {
-          message = "This email exists already!";
+        if (response.status == 500) {
+          const errorResData = await response.text();
+          console.log(errorResData);
+          message = "Internal Server Error"
+        } else {
+          const errorResData = await response.json();
+          console.log(errorResData);
+          const errorId = errorResData.msg;
+          if (errorId === "User already registered") {
+            message = "This email exists already";
+          }
         }
         throw new Error(message);
       }
-  
+
       const resData = await response.json();
       console.log(resData);
     };
@@ -53,17 +60,24 @@ export const login = (email, password) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "emailAddress": email,
-        "password": password
+        emailAddress: email,
+        password: password
       }
     });
+
     if (!response.ok) {
-      const errorResData = await response.json();
-      console.log(errorResData);
-      const errorId = errorResData.msg//error.message;
       let message = "Something went wrong!";
-      if (errorId === "Incorrect user name or password") {
-        message = "Incorrect user name or password";
+      if (response.status == 500) {
+        const errorResData = await response.text();
+        console.log(errorResData);
+        message = "Internal Server Error"
+      } else {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        const errorId = errorResData.msg;
+        if (errorId === "Incorrect user name or password") {
+          message = "Incorrect user name or password";
+        }
       }
       throw new Error(message);
     }

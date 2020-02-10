@@ -20,7 +20,6 @@ import * as authActions from "../../store/actions/auth";
 
 const FORM_INPUT_UPDATE = "FORM_INPUT_UPDATE";
 
-//ADD VALIDATION TO ENSURE PASSWORDS MATCH
 const formReducer = (state, action) => {
   if (action.type === FORM_INPUT_UPDATE) {
     const updatedValues = {
@@ -66,18 +65,11 @@ const AuthScreen = props => {
     formIsValid: false
   });
 
-  /*useEffect(() => {
-    if (error) {
-      Alert.alert("An Error Occurred!", error, [{ text: "Okay" }]);
-    }
-  }, [error]);*/
-
   const authHandler = async () => {
     //props.navigation.navigate("LeaderBoard");
     setError(null);
-    let action;
-    console.log(error);
     console.log(formState);
+    let action;
     if (isRegister) {
       if (!formState.inputValidities.name) {
         setError("Please Enter a Valid Name");
@@ -109,7 +101,7 @@ const AuthScreen = props => {
         );
       }
     }
-    if (!error) {
+    if (!error && action != null) {
       setIsLoading(true);
       try {
         await dispatch(action);
@@ -153,9 +145,9 @@ const AuthScreen = props => {
       >
         <Card style={styles.authContainer}>
           <ScrollView>
+            <Text style={styles.error}>{!error ? "" : error}</Text>
             {isRegister ? (
               <View>
-                {error != null ? (<Text style={styles.error}>error</Text>) : (<Text></Text>)}
                 <Input
                   id="name"
                   label="Name"
@@ -191,7 +183,7 @@ const AuthScreen = props => {
                   initialValue=""
                 />
                 <Input
-                  id="confirmpassword"
+                  id="confirmPassword"
                   label="Confirm Password"
                   keyboardType="default"
                   secureTextEntry
@@ -284,7 +276,8 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
     fontSize: 18,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    textAlign: "center"
   },
   buttonContainer: {
     marginTop: 10
