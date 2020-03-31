@@ -7,13 +7,12 @@ import {
   ActivityIndicator,
   Alert
 } from "react-native";
-import { Provider, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
 import { Ionicons } from "@expo/vector-icons";
 
 import * as plantIDActions from "../../store/actions/plantID";
-import PlantInformationScreen from "./PlantInformationScreen";
 
 const CameraScreen = props => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -22,14 +21,17 @@ const CameraScreen = props => {
   const dispatch = useDispatch();
 
   const photo = async () => {
-    let SavedPhoto;
     if (this.camera) {
-      Savedphoto = await this.camera.takePictureAsync({
+      const SavedPhoto = await this.camera.takePictureAsync({
         base64: true
       });
       try {
-        dispatch(plantIDActions.identifyPlant(SavedPhoto, 10, 20));
-        props.navigation.navigate("PlantInformation");
+        //atm params are hard coded
+        dispatch(plantIDActions.identifyPlant(SavedPhoto, 10, 20, 1));
+        console.log("after identifyPlant");
+        dispatch(plantIDActions.checkIdentification("fakeUrl", 978307, 1));
+        console.log("after dispatch");
+        props.navigation.navigate("PlantsOverview");
       } catch (err) {
         setError(err.message);
         console.log(err.message);

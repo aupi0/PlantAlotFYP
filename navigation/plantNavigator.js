@@ -9,7 +9,8 @@ import { useDispatch } from "react-redux";
 
 import LeaderBoardScreen from "../screens/loggedIn/LeaderBoardScreen";
 import CameraScreen from "../screens/loggedIn/CameraScreen";
-import PlantInformationScreen from "../screens/loggedIn/PlantInformationScreen";
+import PlantsOverviewScreen from "../screens/loggedIn/PlantsOverviewScreen";
+import PlantDetailScreen from "../screens/loggedIn/PlantDetailScreen";
 import AuthScreen from "../screens/anonymousUser/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Colours from "../constants/Colours";
@@ -28,22 +29,21 @@ const defaultNavOptions = {
   headerTintColor: Colours.primary
 };
 
-const PlantStackNavigator = createStackNavigator(
+const plantStackNavigator = createStackNavigator(
   {
-    LeaderBoard: LeaderBoardScreen,
-    Camera: CameraScreen,
-    PlantInformation: PlantInformationScreen
+    PlantsOverview: PlantsOverviewScreen,
+    PlantDetail:  PlantDetailScreen
   },
   {
-    navigationOptions: {
-      /*drawerIcon: drawerConfig => (
-        <Ionicons
-          name='ios-cart'
-          size={23}
-          color={drawerConfig.tintColor}
-        />
-      )*/
-    },
+      defaultNavigationOptions: defaultNavOptions
+  }
+);
+
+const stackNavigator = createStackNavigator(
+  {
+    LeaderBoard: LeaderBoardScreen
+  },
+  {
     defaultNavigationOptions: defaultNavOptions
   }
 );
@@ -51,7 +51,7 @@ const PlantStackNavigator = createStackNavigator(
 const PlantTabNavigator = createBottomTabNavigator(
   {
     LeaderBoard: {
-      screen: PlantStackNavigator,
+      screen: stackNavigator,
       navigationOptions: {
         tabBarIcon: tabInfo => {
           return (
@@ -70,19 +70,29 @@ const PlantTabNavigator = createBottomTabNavigator(
         },
         tabBarVisible: false
       }
+    },
+    'User\'s Plants': {
+      screen: plantStackNavigator,
+      navigationOptions: {
+        tabBarIcon: tabInfo => {
+          return (
+            <Ionicons name="ios-leaf" size={30} color={tabInfo.tintColor} />
+          );
+        }
+      }
     }
   },
   {
     tabBarOptions: {
       activeTintColor: Colours.primary
-    }
+    },
+    defaultNavigationOptions: defaultNavOptions
   }
 );
 
 const PlantDrawNavigator = createDrawerNavigator(
   {
-    LeaderBoard: PlantTabNavigator,
-    PlantInformation: PlantInformationScreen
+    LeaderBoard: PlantTabNavigator
   },
   {
     contentOptions: {

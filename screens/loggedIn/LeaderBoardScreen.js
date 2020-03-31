@@ -1,13 +1,33 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, AsyncStorage } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import HeaderButton from "../../components/UI/HeaderButton";
 
 const LeaderBoardScreen = props => {
+  //const [name, setName] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const name = useSelector(state => state.auth.name);
+  const test = getName;
+
+  const getName = async () => {
+    setIsLoading(true);
+    const usersName = await AsyncStorage.getItem("usersName");
+    const jsonName = JSON.parse(usersName);
+    setName(jsonName.name);
+    console.log(name);
+    setIsLoading(false);
+  };
+
   return (
     <View style={styles.screen}>
-      <Text>Temporary LeaderBoard Screen Text</Text>
+      {isLoading ? (
+        <ActivityIndicator size="Large" />
+      ) : (
+        <Text>Welcome {name} to the LeaderBoard Screen</Text>
+      )}
     </View>
   );
 };
@@ -32,7 +52,7 @@ LeaderBoardScreen.navigationOptions = navData => {
           title="Logout"
           iconName={"ios-log-out"}
           onPress={() => {
-            navData.navigation.navigate('Auth');
+            navData.navigation.navigate("Auth");
           }}
         />
       </HeaderButtons>

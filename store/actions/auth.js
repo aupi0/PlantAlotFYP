@@ -6,14 +6,45 @@ export const LOGOUT = "LOGOUT";
 
 let timer;
 
-export const authenticate = (userId, token, expiryTime) => {
-  return dispatch => {
+export const authenticate = () => {
+  return async dispatch => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    const response = await fetch("http://api.sherlock.uk:5000/protected", {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + jsonUserData.token
+      }
+    });
+
+    if (!response.ok) {
+      let message = "Something went wrong!";
+      if (response.status == 500) {
+        const errorResData = await response.text();
+        console.log(errorResData);
+        message = "Internal Server Error";
+      } else {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        message = errorResData.msg;
+      }
+      throw new Error(message);
+    }
+
+    const resData = await response.json();
+    console.log(resData);
+
+    dispatch({ type: AUTHENTICATE, name: resData.name });
+    saveNameToStorage(resData.name);
+  };
+  /*return dispatch => {
     dispatch(setLogoutTimer(expiryTime));
     dispatch({ type: AUTHENTICATE, userId: userId, token: token });
-  };
+  };*/
 };
 
 export const register = (name, email, password, confirmPassword) => {
+  //Is this not done else where?
   if (password != confirmPassword) {
     message = "Passwords do not Match!";
     throw new Error(message);
@@ -34,7 +65,7 @@ export const register = (name, email, password, confirmPassword) => {
         if (response.status == 500) {
           const errorResData = await response.text();
           console.log(errorResData);
-          message = "Internal Server Error"
+          message = "Internal Server Error";
         } else {
           const errorResData = await response.json();
           console.log(errorResData);
@@ -70,7 +101,7 @@ export const login = (email, password) => {
       if (response.status == 500) {
         const errorResData = await response.text();
         console.log(errorResData);
-        message = "Internal Server Error"
+        message = "Internal Server Error";
       } else {
         const errorResData = await response.json();
         console.log(errorResData);
@@ -84,6 +115,7 @@ export const login = (email, password) => {
 
     const resData = await response.json();
     console.log(resData);
+    saveTokenToStorage(resData.accessToken);
     /*dispatch(
       authenticate(
         resData.localId,
@@ -100,6 +132,7 @@ export const login = (email, password) => {
 
 export const logout = () => {
   clearLogoutTimer();
+  //make this dispatch instead?
   AsyncStorage.removeItem("userData");
   return { type: LOGOUT };
 };
@@ -118,13 +151,20 @@ const setLogoutTimer = expirationTime => {
   };
 };
 
-const saveDataToStorage = (token, userId, expirationDate) => {
+const saveNameToStorage = name => {
+  AsyncStorage.setItem(
+    "usersName",
+    JSON.stringify({
+      name: name
+    })
+  );
+};
+
+const saveTokenToStorage = token => {
   AsyncStorage.setItem(
     "userData",
     JSON.stringify({
-      token: token,
-      userId: userId,
-      expiryDate: expirationDate.toISOString()
+      token: token
     })
   );
 };

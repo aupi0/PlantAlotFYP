@@ -107,6 +107,7 @@ const AuthScreen = props => {
         await dispatch(action);
         if (isRegister) {
           setIsRegister(false);
+          setIsLoading(false);
         } else {
           props.navigation.navigate("LeaderBoard");
         }
