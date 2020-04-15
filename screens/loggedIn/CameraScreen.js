@@ -1,37 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, AsyncStorage } from "react";
 import {
   View,
   Text,
+  Button,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Alert
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Camera } from "expo-camera";
+import * as Location from 'expo-location';
 import * as Permissions from "expo-permissions";
 import { Ionicons } from "@expo/vector-icons";
 
 import * as plantIDActions from "../../store/actions/plantID";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 const CameraScreen = props => {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [error, setError] = useState();
+  const userId = useSelector(state => state.auth.userId);
   const dispatch = useDispatch();
 
   const photo = async () => {
     if (this.camera) {
-      const SavedPhoto = await this.camera.takePictureAsync({
-        base64: true
-      });
       try {
-        //atm params are hard coded
-        dispatch(plantIDActions.identifyPlant(SavedPhoto, 10, 20, 1));
-        console.log("after identifyPlant");
-        dispatch(plantIDActions.checkIdentification("fakeUrl", 978307, 1));
-        console.log("after dispatch");
-        props.navigation.navigate("PlantsOverview");
+        const SavedPhoto = await this.camera.takePictureAsync({
+          base64: true
+        });
+        const location = await Location.getCurrentPositionAsync({
+          timeout: 5000
+        });
+
+        //atm longitude and latitude are haredcoded
+        dispatch(plantIDActions.identifyPlant(SavedPhoto, location.coords.latitude, location.coords.longitude, userId));
+        /*const plantData = await AsyncStorage.getItem("plantData");
+        const jsonPlantData = JSON.parse(plantData);
+        const plantId = jsonPlantData.plantId;
+        const imageUrl = jsonPlantData.imageUrl;
+        console.log("plantId = " + plantId);
+        console.log("imageUrl = " + imageUrl);
+        dispatch(plantIDActions.checkIdentification(imageUrl, plantId));*/
+        timeWaste = async() => {
+          return new Promise((resolve) =>
+            setTimeout(
+              () => { resolve('result') },
+              20000
+            )
+          );
+        }
+  
+        const timeWasteData = await this.timeWaste();
+  
+        if (timeWasteData !== null) {
+          props.navigation.navigate("PlantsOverview");
+        }
       } catch (err) {
         setError(err.message);
         console.log(err.message);
@@ -46,26 +72,35 @@ const CameraScreen = props => {
   }, [error]);
 
   useEffect(() => {
+    (async() => {
+      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      setHasLocationPermission(status === "granted");
+    })();
+  });
+
+  useEffect(() => {
     (async () => {
       const { status } = await Permissions.askAsync(Permissions.CAMERA);
-      setHasPermission(status === "granted");
+      setHasCameraPermission(status === "granted");
     })();
-  }, []);
+  });
 
-  if (hasPermission === null) {
-    return <ActivityIndicator size="large" />;
+  if (hasCameraPermission === null || hasLocationPermission === null) {
+    return <View style={styles.screen}><ActivityIndicator size="large" color={Colors.primary}/></View>;
   }
-  if (hasPermission === false) {
-    Alert.alert(
-      "Insifficient Permissions",
-      "Please Provide Access to the Camera to Take a Photo!",
-      [{ text: "Okay" }]
-    );
+  if (hasCameraPermission === false) {
     return (
       <View style={styles.screen}>
-        <Text>Please Provide Access to the Camera to Take a Photo!</Text>
+        <Text>Please Provide Access to the Camera and reload to use this app!</Text>
       </View>
     );
+  }
+  if (hasLocationPermission === false) {
+    return (
+      <View style={styles.screen}>
+        <Text>Please Provide Access to Location Information and reload to use this app!</Text>
+      </View>
+    )
   }
   return (
     <View style={styles.flex}>
@@ -119,8 +154,8 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    alignItems: "center"
   },
   touchableContainer: {
     flex: 1,

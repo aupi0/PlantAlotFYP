@@ -28,13 +28,10 @@ const PlantInstance = props => {
             </View>
             <View style={styles.details}>
               <Text style={styles.plantName}>{props.plantName}</Text>
-              <Text style={styles.points}>{props.points}</Text>
-              <Text style={styles.text}>{props.latitude}</Text>
-              <Text style={styles.text}>{props.longitude}</Text>
-              <Text style={styles.text}>{props.dateTime}</Text>
-            </View>
-            <View style={styles.actions}>
-              {props.children}
+              <Text style={styles.text}>Points: {props.points}</Text>
+              <Text style={styles.text}>Latitude: {props.latitude}</Text>
+              <Text style={styles.text}>Longitude: {props.longitude}</Text>
+              <Text style={styles.text}>Date and Time Found: {props.dateTimeFound}</Text>
             </View>
           </View>
         </TouchableCmp>
@@ -45,7 +42,7 @@ const PlantInstance = props => {
 
 const styles = StyleSheet.create({
   plant: {
-    height: 300,
+    height: 350,
     margin: 20
   },
   touchable: {
@@ -65,7 +62,7 @@ const styles = StyleSheet.create({
   },
   details: {
     alignItems: "center",
-    height: "20%",
+    height: "40%",
     padding: 10
   },
   plantName: {

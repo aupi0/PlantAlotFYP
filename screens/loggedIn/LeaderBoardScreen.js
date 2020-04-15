@@ -1,33 +1,26 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, AsyncStorage } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, StyleSheet, Button, ActivityIndicator } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import HeaderButton from "../../components/UI/HeaderButton";
+import Colors from "../../constants/Colours";
+import * as authActions from "../../store/actions/auth";
 
 const LeaderBoardScreen = props => {
-  //const [name, setName] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-
   const name = useSelector(state => state.auth.name);
-  const test = getName;
 
-  const getName = async () => {
-    setIsLoading(true);
-    const usersName = await AsyncStorage.getItem("usersName");
-    const jsonName = JSON.parse(usersName);
-    setName(jsonName.name);
-    console.log(name);
-    setIsLoading(false);
-  };
+  /*if (name === undefined) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }*/
 
   return (
     <View style={styles.screen}>
-      {isLoading ? (
-        <ActivityIndicator size="Large" />
-      ) : (
         <Text>Welcome {name} to the LeaderBoard Screen</Text>
-      )}
     </View>
   );
 };
@@ -52,6 +45,7 @@ LeaderBoardScreen.navigationOptions = navData => {
           title="Logout"
           iconName={"ios-log-out"}
           onPress={() => {
+            authActions.logout();
             navData.navigation.navigate("Auth");
           }}
         />

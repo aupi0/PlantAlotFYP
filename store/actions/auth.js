@@ -4,18 +4,19 @@ export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
-let timer;
-
 export const authenticate = () => {
-  return async dispatch => {
+  return async (dispatch) => {
     const userData = await AsyncStorage.getItem("userData");
     const jsonUserData = JSON.parse(userData);
-    const response = await fetch("http://api.sherlock.uk:5000/protected", {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + jsonUserData.token
+    const response = await fetch(
+      "http://api.sherlock.uk:5000/get_user_details",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + jsonUserData.token,
+        },
       }
-    });
+    );
 
     if (!response.ok) {
       let message = "Something went wrong!";
@@ -34,13 +35,13 @@ export const authenticate = () => {
     const resData = await response.json();
     console.log(resData);
 
-    dispatch({ type: AUTHENTICATE, name: resData.name });
-    saveNameToStorage(resData.name);
+    dispatch({
+      type: AUTHENTICATE,
+      name: resData.name,
+      userId: resData.userId,
+    });
+    //saveNameToStorage(resData.name);
   };
-  /*return dispatch => {
-    dispatch(setLogoutTimer(expiryTime));
-    dispatch({ type: AUTHENTICATE, userId: userId, token: token });
-  };*/
 };
 
 export const register = (name, email, password, confirmPassword) => {
@@ -49,15 +50,15 @@ export const register = (name, email, password, confirmPassword) => {
     message = "Passwords do not Match!";
     throw new Error(message);
   } else {
-    return async dispatch => {
+    return async () => {
       const response = await fetch("http://api.sherlock.uk:5000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           name: name,
           emailAddress: email,
-          password: password
-        }
+          password: password,
+        },
       });
 
       if (!response.ok) {
@@ -86,14 +87,14 @@ export const register = (name, email, password, confirmPassword) => {
 export const login = (email, password) => {
   console.log(email);
   console.log(password);
-  return async dispatch => {
+  return async (dispatch) => {
     const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         emailAddress: email,
-        password: password
-      }
+        password: password,
+      },
     });
 
     if (!response.ok) {
@@ -116,55 +117,27 @@ export const login = (email, password) => {
     const resData = await response.json();
     console.log(resData);
     saveTokenToStorage(resData.accessToken);
-    /*dispatch(
-      authenticate(
-        resData.localId,
-        resData.idToken,
-        parseInt(resData.expiresIn) * 1000
-      )
-    );
-    const expirationDate = new Date(
-      new Date().getTime() + parseInt(resData.expiresIn) * 1000
-    );
-    saveDataToStorage(resData.idToken, resData.localId, expirationDate);*/
+    dispatch({
+      type: AUTHENTICATE,
+      name: resData.name,
+      userId: resData.userId,
+    });
   };
 };
 
-export const logout = () => {
-  clearLogoutTimer();
+export const logout = (dispatch) => {
   //make this dispatch instead?
   AsyncStorage.removeItem("userData");
-  return { type: LOGOUT };
-};
-
-const clearLogoutTimer = () => {
-  if (timer) {
-    clearTimeout(timer);
-  }
-};
-
-const setLogoutTimer = expirationTime => {
   return dispatch => {
-    timer = setTimeout(() => {
-      dispatch(logout());
-    }, expirationTime);
+    dispatch({ type: LOGOUT });
   };
 };
 
-const saveNameToStorage = name => {
-  AsyncStorage.setItem(
-    "usersName",
-    JSON.stringify({
-      name: name
-    })
-  );
-};
-
-const saveTokenToStorage = token => {
+const saveTokenToStorage = (token) => {
   AsyncStorage.setItem(
     "userData",
     JSON.stringify({
-      token: token
+      token: token,
     })
   );
 };

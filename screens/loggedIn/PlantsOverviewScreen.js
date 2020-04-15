@@ -9,11 +9,11 @@ import {
   FlatList
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-//import { FlatList } from "react-native-gesture-handler";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import PlantInstance from "../../components/plants/PlantInstance";
 import * as plantIDActions from "../../store/actions/plantID";
+import * as authActions from "../../store/actions/auth";
 import Colors from "../../constants/Colours";
 import HeaderButton from "../../components/UI/HeaderButton";
 
@@ -21,8 +21,6 @@ const PlantsOverviewScreen = props => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
-
-  //get userPlants from database;
   const userPlants = useSelector(state => state.plantID.userPlants);
   const dispatch = useDispatch();
 
@@ -30,7 +28,6 @@ const PlantsOverviewScreen = props => {
     setError(null);
     setIsRefreshing(true);
     try {
-      //atm params are hard coded
       await dispatch(plantIDActions.getUserPlants());
       console.log("after getUserPlants");
     } catch (err) {
@@ -63,6 +60,7 @@ const PlantsOverviewScreen = props => {
   };
 
   if (error) {
+    console.log(error);
     return (
       <View style={styles.centered}>
         <Text>It Appears an error occurred!</Text>
@@ -92,76 +90,29 @@ const PlantsOverviewScreen = props => {
       onRefresh={loadPlants}
       refreshing={isRefreshing}
       data={userPlants}
-      keyExtractor={plant => plant.id}
-      renderItem={plantData => (
+      keyExtractor={item => item.plantId}
+      renderItem={itemData => (
         <PlantInstance
-          image={plantData.plant.imageUrl}
-          plantName={plantData.plant.plantName}
-          points={plantData.plant.points}
-          latitude={plantData.plant.latitude}
-          longitude={plantData.plant.longitude}
-          dateTime={plantData.plant.dateTime}
+          image={itemData.item.imageUrl}
+          plantName={itemData.item.plantName}
+          points={itemData.item.points}
+          latitude={itemData.item.latitude}
+          longitude={itemData.item.longitude}
+          dateTimeFound={itemData.item.dateTimeFound}
           onSelect={() => {
-            selectPlantHandler(plantData.plant.id, plantData.plant.plantName);
+            selectPlantHandler(itemData.item.plantId, itemData.item.plantName);
           }}
         >
           <Button
             color={Colors.primary}
             title="View Details"
             onPress={() => {
-              selectPlantHandler(plantData.plant.id, plantData.plant.plantName);
+              selectPlantHandler(itemData.item.id, itemData.item.plantName);
             }}
           />
         </PlantInstance>
       )}
     />
-  );
-
-  //homemade temporary crap
-  const id = useSelector(state => state.plantID.userPlants);
-  const name = useSelector(state => state.auth.name);
-  console.log("Name = " + name);
-  console.log("id = " + id);
-
-  /*imageUrl: null,
-        userId: null,
-        plantName: null,
-        latitude: null,
-        longitude: null,
-        plantInfoUrl: null,
-        time: null,
-        commonName: null,
-        probability: null);*/
-
-  const plantInfo = async () => {
-    try {
-      //atm params are hard coded
-      dispatch(plantIDActions.checkIdentification("fakeUrl", 978307, 1));
-    } catch (err) {
-      setError(err.message);
-      console.log(err.message);
-    }
-  };
-  return (
-    <View style={styles.screen}>
-      {isLoading ? (
-        <ActivityIndicator size="Large" />
-      ) : (
-        <View>
-          <Text>PlantInfoScreen</Text>
-          <Text>
-            Hello {name} id = {id}
-            ADD TILES TO REPRESENT USERS PAST PLANTS, WITH MOST RECENT AT THE
-            TOP
-          </Text>
-          <View>
-            <TouchableOpacity style={styles.touchable} onPress={plantInfo}>
-              <Text>Press here</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-    </View>
   );
 };
 
@@ -185,6 +136,7 @@ PlantsOverviewScreen.navigationOptions = navData => {
           title="Logout"
           iconName={"ios-log-out"}
           onPress={() => {
+            authActions.logout();
             navData.navigation.navigate("Auth");
           }}
         />

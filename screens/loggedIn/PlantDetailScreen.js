@@ -1,118 +1,116 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React from "react";
 import {
+  ScrollView,
   View,
   Text,
+  Image,
   Button,
   StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator
+  ProgressBarAndroidBase,
+  Linking,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
-import PlantInstance from '../../components/plants/PlantInstance';
 import * as plantIDActions from "../../store/actions/plantID";
+import * as authActions from "../../store/actions/auth";
+import HeaderButton from "../../components/UI/HeaderButton";
 import Colors from "../../constants/Colours";
 
-const PlantDetailScreen = props => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState();
+const PlantDetailScreen = (props) => {
+  const plantId = props.navigation.getParam("plantId");
+  const selectedPlant = useSelector((state) =>
+    state.plantID.userPlants.find((plant) => plant.plantId === plantId)
+  );
 
-  //get userPlants from database;
-  const userPlants = useSelector(state => state.plants.plants);
-  const dispatch = useDispatch();
-
-  const loadPlants = useCallback(async () => {
-    setError(null);
-    setIsRefreshing(true);
-    try {
-      //atm params are hard coded
-      await dispatch(plantIDActions.getUserPlants());
-      console.log("after getUserPlants");
-    } catch (err) {
-      setError(err.message);
-      console.log(err.message);
-    }
-    setIsRefreshing(false);
-  }, [dispatch, setIsLoading, setError]);
-
-  useEffect(() => {
-    const willFocusSub = props.navigation.addListener(
-      'willFocus',
-      loadPlants
-    );
-
-    return () => {
-      willFocusSub.remove();
-    };
-  }, [loadPlants]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    loadPlants().then(() => {
-      setIsLoading(false);
-    });
-  }, [dispatch, loadPlants]);
-
-  const selectPlantHandler = (id, title) => {
-    props.navigation.navigate('PlantDetail', {
-      plantId: id,
-      plantTitle: title
-    });
-  };
-
-  //homemade temporary crap
-  const id = useSelector(state => state.plantID.id);
-  const name = useSelector(state => state.auth.name);
-  console.log("Name = " + name);
-  console.log("id = " + id);
-
-  /*imageUrl: null,
-        userId: null,
-        plantName: null,
-        latitude: null,
-        longitude: null,
-        plantInfoUrl: null,
-        time: null,
-        commonName: null,
-        probability: null);*/
-
-  const plantInfo = async () => {
-    try {
-      //atm params are hard coded
-      dispatch(plantIDActions.checkIdentification("fakeUrl", 978307, 1));
-    } catch (err) {
-      setError(err.message);
-      console.log(err.message);
-    }
-  };
   return (
+    //Make scrollview if needed but stops plantId being bottem of screen
     <View style={styles.screen}>
-      {isLoading ? (
-        <ActivityIndicator size="Large" />
-      ) : (
-        <View>
-          <Text>PlantInfoScreen</Text>
-          <Text>
-            Hello {name} id = {id}
-            ADD TILES TO REPRESENT USERS PAST PLANTS, WITH MOST RECENT AT THE TOP
-          </Text>
-          <View>
-            <TouchableOpacity style={styles.touchable} onPress={plantInfo}>
-              <Text>Press here</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <Text style={styles.name}>{selectedPlant.plantName}</Text>
+      <Image style={styles.image} source={{ uri: selectedPlant.imageUrl }} />
+      <Text style={styles.text}>Common Name: {selectedPlant.commonName}</Text>
+      <Text style={styles.text}>Points: {selectedPlant.points}</Text>
+      <Text style={styles.text}>Latitude: {selectedPlant.latitude}</Text>
+      <Text style={styles.text}>longitude: {selectedPlant.longitude}</Text>
+      <Text style={styles.text}>
+        For Extra Info:{" "}
+        <Text
+          style={{ color: "blue" }}
+          onPress={() => Linking.openURL(selectedPlant.plantInfoUrl)}
+        >
+          {selectedPlant.plantInfoUrl}
+        </Text>
+      </Text>
+      <Text style={styles.text}>
+        Date and Time Found: {selectedPlant.dateTimeFound}
+      </Text>
+      <Text style={styles.text}>
+        {selectedPlant.probability * 100}% confidence in identification
+      </Text>
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoText}>Plant Identification powered by</Text>
+        <Image
+          source={require("../../assets/plantIdLogo.png")}
+        />
+      </View>
     </View>
   );
 };
 
+PlantDetailScreen.navigationOptions = (navData) => {
+  return {
+    headerTitle: "PlantAlot",
+    headerRight: () => (
+      <HeaderButtons HeaderButtonComponent={HeaderButton}>
+        <Item
+          title="Logout"
+          iconName={"ios-log-out"}
+          onPress={() => {
+            authActions.logout();
+            navData.navigation.navigate("Auth");
+          }}
+        />
+      </HeaderButtons>
+    ),
+  };
+};
+
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
-    alignItems: "center",
-    alignItems: "center"
+    flex: 1
+  },
+  name: {
+    fontSize: 25,
+    textAlign: "center",
+    marginVertical: 10,
+  },
+  image: {
+    width: "100%",
+    height: 300,
+  },
+  points: {
+    fontSize: 20,
+    color: "#888",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  text: {
+    fontSize: 14,
+    textAlign: "center",
+    marginHorizontal: 20,
+  },
+  logoContainer: {
+    width: '100%',
+    marginTop: 30,
+    marginBottom: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0
+  },
+  logoText: {
+    fontSize: 10,
+    textAlign: "center"
   }
 });
 
