@@ -1,5 +1,4 @@
 import { AUTHENTICATE, LOGOUT } from "../actions/auth";
-import Name from "../../models/name";
 
 const initialState = {
   name: null,

@@ -40,12 +40,10 @@ export const authenticate = () => {
       name: resData.name,
       userId: resData.userId,
     });
-    //saveNameToStorage(resData.name);
   };
 };
 
 export const register = (name, email, password, confirmPassword) => {
-  //Is this not done else where?
   if (password != confirmPassword) {
     message = "Passwords do not Match!";
     throw new Error(message);
@@ -117,16 +115,10 @@ export const login = (email, password) => {
     const resData = await response.json();
     console.log(resData);
     saveTokenToStorage(resData.accessToken);
-    dispatch({
-      type: AUTHENTICATE,
-      name: resData.name,
-      userId: resData.userId,
-    });
   };
 };
 
 export const logout = (dispatch) => {
-  //make this dispatch instead?
   AsyncStorage.removeItem("userData");
   return dispatch => {
     dispatch({ type: LOGOUT });

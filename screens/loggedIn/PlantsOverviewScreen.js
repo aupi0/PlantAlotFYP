@@ -6,7 +6,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  FlatList
+  FlatList,
+  AsyncStorage
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -44,6 +45,24 @@ const PlantsOverviewScreen = props => {
       willFocusSub.remove();
     };
   }, [loadPlants]);
+
+  useEffect(() => {
+    const tryAuth = async () => {
+      const userData = await AsyncStorage.getItem('userData');
+      if (!userData) {
+        props.navigation.navigate('Auth');
+        return;
+      } else {
+          try {
+            await dispatch(authActions.authenticate());
+          } catch (err) {
+            console.log(err);
+            props.navigation.navigate('Auth');
+          }
+      }
+    };
+    tryAuth();
+  }, [dispatch]);
 
   useEffect(() => {
     setIsLoading(true);

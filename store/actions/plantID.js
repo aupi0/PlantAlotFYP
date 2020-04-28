@@ -1,56 +1,31 @@
-import { AsyncStorage } from "react-native";
+import { AsyncStorage, ImageStore } from "react-native";
 
 import Plant from "../../models/plant";
 
-export const ADD_PLANT = "ADD_PLANT";
 export const SET_PLANTS = "SET_PLANTS";
-export const PREP_CALLS = "PREP_CALLS";
 
-/* exmaple response
-Object {
-  "callback_url": null,
-  "classified": null,
-  "countable": true,
-  "created": 1582133865.938792,
-  "custom_id": null,
-  "custom_url": null,
-  "fail_cause": null,
-  "feedback": null,
-  "id": 1025098,
-  "images": Array [
-    Object {
-      "file_name": "763935b861214e00af6d3ce45a45ed6c.jpg",
-      "url": "https://plant.id/media/images/763935b861214e00af6d3ce45a45ed6c.jpg",
-      "url_small": "https://plant.id/media/images/763935b861214e00af6d3ce45a45ed6c_small.jpg",
-      "url_tiny": "https://plant.id/media/images/763935b861214e00af6d3ce45a45ed6c_tiny.jpg",
-    },
-  ],
-  "latitude": 10,
-  "longitude": 20,
-  "parameters": Array [],
-  "secret": "i3tvwNFKlvgoelA",
-  "sent": null,
-  "source": "P17204157@my365.dmu.ac.uk",
-  "suggestions": Array [],
-  "week": null,
-}*/
-export const identifyPlant = (image64, latitude, longitude, userId) => {
+export const identifyPlant = (image, latitude, longitude, userId) => {
+  console.log();
   return async () => {
-    const key = "16NJBlZVhom9201TsHZyUO3xy1qPouj80EvHQlc53klIM2tYu1";
-    //const key = "FAKEKEY";
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    console.log(image.base64.substring(0, 100));
     try {
-      const response = await fetch("https://api.plant.id/identify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          key: key,
-          images: [image64.base64],
-          latitude: latitude,
-          longitude: longitude,
-        }),
-      });
+      const response = await fetch(
+        "http://api.sherlock.uk:5000/identify_plant",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + jsonUserData.token,
+          },
+          body: JSON.stringify({
+            image: image.base64,
+            latitude: latitude,
+            longitude: longitude,
+          }),
+        }
+      );
 
       if (!response.ok) {
         console.log(response.status);
@@ -62,68 +37,39 @@ export const identifyPlant = (image64, latitude, longitude, userId) => {
       const resData = await response.json();
       console.log(resData);
 
-      timeWaste = async() => {
+      timeWaste = async () => {
         return new Promise((resolve) =>
-          setTimeout(
-            () => { resolve('result') },
-            7000
-          )
+          setTimeout(() => {
+            resolve("result");
+          }, 5000)
         );
-      }
+      };
 
       const timeWasteData = await this.timeWaste();
 
       if (timeWasteData !== null) {
-        await checkIdentification(resData.images[0].url, resData.id, userId);
+        if (resData.suggestions.length < 1) {
+          console.log("error: 0 suggestions");
+        } else {
+          await savePlantToDatabase(
+            userId,
+            resData.id,
+            resData.suggestions[0].plant.name,
+            resData.images[0].url,
+            resData.latitude,
+            resData.longitude,
+            resData.suggestions[0].plant.url,
+            resData.sent,
+            resData.suggestions[0].plant.common_name,
+            resData.suggestions[0].probability
+          );
+        }
       }
     } catch (err) {
       console.log(err);
       throw err;
     }
   };
-};
-
-const checkIdentification = async (imageUrl, plantId, userId) => {
-  const key = "16NJBlZVhom9201TsHZyUO3xy1qPouj80EvHQlc53klIM2tYu1";
-  //const key = "FAKEKEY";
-  try {
-    const response = await fetch("https://api.plant.id/check_identifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        key: key,
-        ids: [plantId],
-      }),
-    });
-
-    if (!response.ok) {
-      console.log(response.status);
-      const errorResData = await response.json();
-      console.log(errorResData);
-      throw new Error("Something went Wrong!");
-    }
-
-    const resData = await response.json();
-    console.log(resData);
-
-    await savePlantToDatabase(
-      userId,
-      resData[0].id,
-      resData[0].suggestions[0].plant.name,
-      imageUrl,
-      resData[0].latitude,
-      resData[0].longitude,
-      resData[0].suggestions[0].plant.url,
-      resData[0].sent,
-      resData[0].suggestions[0].plant.common_name,
-      resData[0].suggestions[0].probability
-    );
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
 };
 
 const savePlantToDatabase = async (
@@ -139,25 +85,40 @@ const savePlantToDatabase = async (
   probability
 ) => {
   console.log("inside savePlant to Database with userId: " + userId);
+  const userData = await AsyncStorage.getItem("userData");
+  const jsonUserData = JSON.parse(userData);
+
+  console.log("plantId = " + plantId);
+  console.log("plantName = " + plantName);
+  console.log("imageUrl = " + imageUrl);
+  console.log("latitude = " + latitude);
+  console.log("longitude = " + longitude);
+  console.log("plantInfoUrl = " + plantInfoUrl);
+  console.log("commonName = " + commonName);
+  console.log("probability = " + probability);
   try {
-    //temp
-    dateTimeFound = "2020-04-08 23:59:00"
+    console.log("inside savePlantToDatabase");
+    const date = new Date(dateTimeFound * 1000);
+    const dateFormatted = date.toISOString().slice(0, 19).replace('T', ' ');
+    console.log("dateTimeFOund = " + dateFormatted);
     const response = await fetch("http://api.sherlock.uk:5000/add_plant", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        userId: userId,
-        plantId: plantId,
-        plantName: plantName,
-        imageUrl: imageUrl,
+        Authorization: "Bearer " + jsonUserData.token,
+      },
+      body: JSON.stringify({
+        userId: userId.toString(),
+        plantId: plantId.toString(),
+        plantName: plantName.toString(),
+        imageUrl: imageUrl.toString(),
         latitude: latitude,
         longitude: longitude,
-        plantInfoUrl: plantInfoUrl,
-        dateTimeFound: dateTimeFound,
-        commonName: commonName,
+        plantInfoUrl: plantInfoUrl.toString(),
+        dateTimeFound: dateFormatted.toString(),
+        commonName: commonName.toString(),
         probability: probability,
-        points: 20,
-      },
+      }),
     });
 
     if (!response.ok) {
