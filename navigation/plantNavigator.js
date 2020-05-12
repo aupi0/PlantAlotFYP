@@ -3,7 +3,7 @@ import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
-import { SafeAreaView, Button, View } from "react-native";
+import { SafeAreaView, Button, View, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
 
@@ -19,12 +19,6 @@ import * as authActions from "../store/actions/auth";
 const defaultNavOptions = {
   headerStyle: {
     backgroundColor: ""
-  },
-  headerTitleStyle: {
-    //fontFamily: FONT_NAME
-  },
-  headerBackTitleStyle: {
-    //fontFamily: FONT_NAME
   },
   headerTintColor: Colours.primary
 };
@@ -110,6 +104,24 @@ const PlantDrawNavigator = createDrawerNavigator(
               onPress={() => {
                 dispatch(authActions.logout());
                 props.navigation.navigate("Auth");
+              }}
+            />
+            <Button
+              title="Delete Account"
+              color={"red"}
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure you wish to delete your account?',
+                  'This can not be reversed',
+                  [
+                    {text: 'Cancel', onPress: () => console.log('Deleting Account Cancelled'), style: 'cancel'},
+                    {text: 'Delete', onPress: () => {
+                      dispatch(authActions.deleteUser())
+                      props.navigation.navigate("Auth")
+                    }, style: 'destructive'}
+                  ],
+                  { cancelable: false }
+                )
               }}
             />
           </SafeAreaView>

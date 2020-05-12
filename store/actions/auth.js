@@ -83,8 +83,6 @@ export const register = (name, email, password, confirmPassword) => {
 };
 
 export const login = (email, password) => {
-  console.log(email);
-  console.log(password);
   return async (dispatch) => {
     const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
@@ -115,6 +113,47 @@ export const login = (email, password) => {
     const resData = await response.json();
     console.log(resData);
     saveTokenToStorage(resData.accessToken);
+  };
+};
+
+export const deleteUser = () => {
+  return async (dispatch) => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    console.log("token: " + jsonUserData.token);
+    try {
+      const response = await fetch(
+        "http://api.sherlock.uk:5000/delete_user",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer " + jsonUserData.token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        let message = "Something went wrong!";
+        if (response.status == 500) {
+          const errorResData = await response.text();
+          console.log(errorResData);
+          message = "Internal Server Error";
+        } else {
+          const errorResData = await response.json();
+          console.log(errorResData);
+          message = errorResData.msg;
+        }
+        throw new Error(message);
+      }
+
+      const resData = await response.json();
+      console.log(resData);
+
+      await logout();
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   };
 };
 
