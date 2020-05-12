@@ -4,12 +4,42 @@ export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
-let timer;
+export const authenticate = () => {
+  return async (dispatch) => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    const response = await fetch(
+      "http://api.sherlock.uk:5000/get_user_details",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + jsonUserData.token,
+        },
+      }
+    );
 
-export const authenticate = (userId, token, expiryTime) => {
-  return dispatch => {
-    dispatch(setLogoutTimer(expiryTime));
-    dispatch({ type: AUTHENTICATE, userId: userId, token: token });
+    if (!response.ok) {
+      let message = "Something went wrong!";
+      if (response.status == 500) {
+        const errorResData = await response.text();
+        console.log(errorResData);
+        message = "Internal Server Error";
+      } else {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        message = errorResData.msg;
+      }
+      throw new Error(message);
+    }
+
+    const resData = await response.json();
+    console.log(resData);
+
+    dispatch({
+      type: AUTHENTICATE,
+      name: resData.name,
+      userId: resData.userId,
+    });
   };
 };
 
@@ -18,15 +48,15 @@ export const register = (name, email, password, confirmPassword) => {
     message = "Passwords do not Match!";
     throw new Error(message);
   } else {
-    return async dispatch => {
+    return async () => {
       const response = await fetch("http://api.sherlock.uk:5000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           name: name,
           emailAddress: email,
-          password: password
-        }
+          password: password,
+        },
       });
 
       if (!response.ok) {
@@ -34,7 +64,7 @@ export const register = (name, email, password, confirmPassword) => {
         if (response.status == 500) {
           const errorResData = await response.text();
           console.log(errorResData);
-          message = "Internal Server Error"
+          message = "Internal Server Error";
         } else {
           const errorResData = await response.json();
           console.log(errorResData);
@@ -53,16 +83,14 @@ export const register = (name, email, password, confirmPassword) => {
 };
 
 export const login = (email, password) => {
-  console.log(email);
-  console.log(password);
-  return async dispatch => {
+  return async (dispatch) => {
     const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         emailAddress: email,
-        password: password
-      }
+        password: password,
+      },
     });
 
     if (!response.ok) {
@@ -70,7 +98,7 @@ export const login = (email, password) => {
       if (response.status == 500) {
         const errorResData = await response.text();
         console.log(errorResData);
-        message = "Internal Server Error"
+        message = "Internal Server Error";
       } else {
         const errorResData = await response.json();
         console.log(errorResData);
@@ -84,47 +112,63 @@ export const login = (email, password) => {
 
     const resData = await response.json();
     console.log(resData);
-    /*dispatch(
-      authenticate(
-        resData.localId,
-        resData.idToken,
-        parseInt(resData.expiresIn) * 1000
-      )
-    );
-    const expirationDate = new Date(
-      new Date().getTime() + parseInt(resData.expiresIn) * 1000
-    );
-    saveDataToStorage(resData.idToken, resData.localId, expirationDate);*/
+    saveTokenToStorage(resData.accessToken);
   };
 };
 
-export const logout = () => {
-  clearLogoutTimer();
+export const deleteUser = () => {
+  return async (dispatch) => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    console.log("token: " + jsonUserData.token);
+    try {
+      const response = await fetch(
+        "http://api.sherlock.uk:5000/delete_user",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer " + jsonUserData.token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        let message = "Something went wrong!";
+        if (response.status == 500) {
+          const errorResData = await response.text();
+          console.log(errorResData);
+          message = "Internal Server Error";
+        } else {
+          const errorResData = await response.json();
+          console.log(errorResData);
+          message = errorResData.msg;
+        }
+        throw new Error(message);
+      }
+
+      const resData = await response.json();
+      console.log(resData);
+
+      await logout();
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  };
+};
+
+export const logout = (dispatch) => {
   AsyncStorage.removeItem("userData");
-  return { type: LOGOUT };
-};
-
-const clearLogoutTimer = () => {
-  if (timer) {
-    clearTimeout(timer);
-  }
-};
-
-const setLogoutTimer = expirationTime => {
   return dispatch => {
-    timer = setTimeout(() => {
-      dispatch(logout());
-    }, expirationTime);
+    dispatch({ type: LOGOUT });
   };
 };
 
-const saveDataToStorage = (token, userId, expirationDate) => {
+const saveTokenToStorage = (token) => {
   AsyncStorage.setItem(
     "userData",
     JSON.stringify({
       token: token,
-      userId: userId,
-      expiryDate: expirationDate.toISOString()
     })
   );
 };

@@ -5,34 +5,66 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
 } from "react-native";
-import { Provider, useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Camera } from "expo-camera";
+import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
 import { Ionicons } from "@expo/vector-icons";
 
 import * as plantIDActions from "../../store/actions/plantID";
-import PlantInformationScreen from "./PlantInformationScreen";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
-const CameraScreen = props => {
-  const [hasPermission, setHasPermission] = useState(null);
+const CameraScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState(false);
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [type, setType] = useState(Camera.Constants.Type.back);
+  const [flash, setFlash] = useState(Camera.Constants.FlashMode);
   const [error, setError] = useState();
+  const userId = useSelector((state) => state.auth.userId);
   const dispatch = useDispatch();
 
   const photo = async () => {
-    let SavedPhoto;
     if (this.camera) {
-      Savedphoto = await this.camera.takePictureAsync({
-        base64: true
-      });
       try {
-        dispatch(plantIDActions.identifyPlant(SavedPhoto, 10, 20));
-        props.navigation.navigate("PlantInformation");
+        setIsLoading(true);
+        const savedPhoto = await this.camera.takePictureAsync({
+          base64: true,
+          quality: 0.5,
+          exif: false,
+        });
+        const location = await Location.getCurrentPositionAsync({
+          timeout: 5000,
+        });
+
+        dispatch(
+          plantIDActions.identifyPlant(
+            savedPhoto,
+            location.coords.latitude,
+            location.coords.longitude,
+            userId
+          )
+        );
+        timeWaste = async () => {
+          return new Promise((resolve) =>
+            setTimeout(() => {
+              resolve("result");
+            }, 20000)
+          );
+        };
+
+        const timeWasteData = await this.timeWaste();
+
+        if (timeWasteData !== null) {
+          setIsLoading(false);
+          props.navigation.navigate("PlantsOverview");
+        }
       } catch (err) {
         setError(err.message);
         console.log(err.message);
+        setIsLoading(false);
       }
     }
   };
@@ -45,23 +77,41 @@ const CameraScreen = props => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA);
-      setHasPermission(status === "granted");
+      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      setHasLocationPermission(status === "granted");
     })();
-  }, []);
+  });
 
-  if (hasPermission === null) {
-    return <ActivityIndicator size="large" />;
-  }
-  if (hasPermission === false) {
-    Alert.alert(
-      "Insifficient Permissions",
-      "Please Provide Access to the Camera to Take a Photo!",
-      [{ text: "Okay" }]
-    );
+  useEffect(() => {
+    (async () => {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA);
+      setHasCameraPermission(status === "granted");
+    })();
+  });
+
+  if (hasCameraPermission === null || hasLocationPermission === null) {
     return (
       <View style={styles.screen}>
-        <Text>Please Provide Access to the Camera to Take a Photo!</Text>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+  if (hasCameraPermission === false) {
+    return (
+      <View style={styles.screen}>
+        <Text>
+          Please Provide Access to the Camera and reload to use this app!
+        </Text>
+      </View>
+    );
+  }
+  if (hasLocationPermission === false) {
+    return (
+      <View style={styles.screen}>
+        <Text>
+          Please Provide Access to Location Information and reload to use this
+          app!
+        </Text>
       </View>
     );
   }
@@ -70,11 +120,11 @@ const CameraScreen = props => {
       <Camera
         style={styles.flex}
         type={type}
-        ref={ref => {
+        ref={(ref) => {
           this.camera = ref;
         }}
       >
-        <View style={styles.touchableContainer}>
+        <View style={styles.topRow}>
           <TouchableOpacity
             style={styles.close}
             onPress={() => {
@@ -83,11 +133,33 @@ const CameraScreen = props => {
           >
             <Ionicons name="md-close" style={styles.icons} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.touchable} onPress={() => {}}>
-            <Text style={styles.icons}></Text>
+        </View>
+        <View style={styles.bottomRow}>
+          <TouchableOpacity
+            style={styles.touchable}
+            onPress={() => {
+              setFlash(
+                flash === Camera.Constants.FlashMode.on
+                  ? Camera.Constants.FlashMode.off
+                  : Camera.Constants.FlashMode.on
+              );
+            }}
+          >
+            <Ionicons
+              name={
+                flash === Camera.Constants.FlashMode.on
+                  ? "ios-flash"
+                  : "ios-flash-off"
+              }
+              style={styles.icons}
+            />
           </TouchableOpacity>
           <TouchableOpacity style={styles.touchable} onPress={photo}>
-            <Ionicons name="md-camera" style={styles.icons} />
+            {isLoading ? (
+              <ActivityIndicator size="small" />
+            ) : (
+              <Ionicons name="md-camera" style={styles.icons} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.touchable}
@@ -108,39 +180,48 @@ const CameraScreen = props => {
 };
 
 CameraScreen.navigationOptions = {
-  headerTitle: "Camera"
+  headerTitle: "Camera",
 };
 
 const styles = StyleSheet.create({
   flex: {
-    flex: 1
+    flex: 1,
   },
   screen: {
     flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "center"
   },
-  touchableContainer: {
-    flex: 1,
+  bottomRow: {
     backgroundColor: "transparent",
+    width: "100%",
+    bottom: 0,
+    position: "absolute",
     flexDirection: "row",
     justifyContent: "space-between",
-    margin: 20
+    margin: 20,
+    alignSelf: "flex-end",
+    alignItems: "center",
   },
   touchable: {
-    flex: 0.1,
-    alignSelf: "flex-end",
-    alignItems: "center"
+    marginHorizontal: 50,
+    marginVertical: 5,
+  },
+  topRow: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    margin: 20,
+    alignSelf: "flex-start",
+    alignItems: "flex-start",
   },
   close: {
-    flex: 0.1,
     alignSelf: "flex-start",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   },
   icons: {
     color: "#fff",
-    fontSize: 40
-  }
+    fontSize: 40,
+  },
 });
 
 export default CameraScreen;

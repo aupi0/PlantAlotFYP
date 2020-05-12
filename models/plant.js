@@ -1,13 +1,16 @@
 class Plant {
-    constructor(id, imageUrl, infoUrl, name, confidence, confirmed, longitude, latitude) {
-        this.id = id;
+    constructor(plantId, userId, plantName, imageUrl, latitude, longitude, plantInfoUrl, dateTimeFound, commonName, probability, points) {
+        this.plantId = plantId;
+        this.userId = userId;
+        this.plantName = plantName;
         this.imageUrl = imageUrl;
-        this.infoUrl = infoUrl;
-        this.name = name;
-        this.confidence = confidence;
-        this.confirmed = confirmed;
-        this.longitude = longitude;
         this.latitude = latitude;
+        this.longitude = longitude;
+        this.plantInfoUrl = plantInfoUrl;
+        this.dateTimeFound = dateTimeFound;
+        this.commonName = commonName,
+        this.probability = probability,
+        this.points = points
     }
 }
 

@@ -3,13 +3,14 @@ import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
-import { SafeAreaView, Button, View } from "react-native";
+import { SafeAreaView, Button, View, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
 
 import LeaderBoardScreen from "../screens/loggedIn/LeaderBoardScreen";
 import CameraScreen from "../screens/loggedIn/CameraScreen";
-import PlantInformationScreen from "../screens/loggedIn/PlantInformationScreen";
+import PlantsOverviewScreen from "../screens/loggedIn/PlantsOverviewScreen";
+import PlantDetailScreen from "../screens/loggedIn/PlantDetailScreen";
 import AuthScreen from "../screens/anonymousUser/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Colours from "../constants/Colours";
@@ -19,31 +20,24 @@ const defaultNavOptions = {
   headerStyle: {
     backgroundColor: ""
   },
-  headerTitleStyle: {
-    //fontFamily: FONT_NAME
-  },
-  headerBackTitleStyle: {
-    //fontFamily: FONT_NAME
-  },
   headerTintColor: Colours.primary
 };
 
-const PlantStackNavigator = createStackNavigator(
+const plantStackNavigator = createStackNavigator(
   {
-    LeaderBoard: LeaderBoardScreen,
-    Camera: CameraScreen,
-    PlantInformation: PlantInformationScreen
+    PlantsOverview: PlantsOverviewScreen,
+    PlantDetail:  PlantDetailScreen
   },
   {
-    navigationOptions: {
-      /*drawerIcon: drawerConfig => (
-        <Ionicons
-          name='ios-cart'
-          size={23}
-          color={drawerConfig.tintColor}
-        />
-      )*/
-    },
+      defaultNavigationOptions: defaultNavOptions
+  }
+);
+
+const stackNavigator = createStackNavigator(
+  {
+    LeaderBoard: LeaderBoardScreen
+  },
+  {
     defaultNavigationOptions: defaultNavOptions
   }
 );
@@ -51,7 +45,7 @@ const PlantStackNavigator = createStackNavigator(
 const PlantTabNavigator = createBottomTabNavigator(
   {
     LeaderBoard: {
-      screen: PlantStackNavigator,
+      screen: stackNavigator,
       navigationOptions: {
         tabBarIcon: tabInfo => {
           return (
@@ -70,19 +64,29 @@ const PlantTabNavigator = createBottomTabNavigator(
         },
         tabBarVisible: false
       }
+    },
+    'User\'s Plants': {
+      screen: plantStackNavigator,
+      navigationOptions: {
+        tabBarIcon: tabInfo => {
+          return (
+            <Ionicons name="ios-leaf" size={30} color={tabInfo.tintColor} />
+          );
+        }
+      }
     }
   },
   {
     tabBarOptions: {
       activeTintColor: Colours.primary
-    }
+    },
+    defaultNavigationOptions: defaultNavOptions
   }
 );
 
 const PlantDrawNavigator = createDrawerNavigator(
   {
-    LeaderBoard: PlantTabNavigator,
-    PlantInformation: PlantInformationScreen
+    LeaderBoard: PlantTabNavigator
   },
   {
     contentOptions: {
@@ -100,6 +104,24 @@ const PlantDrawNavigator = createDrawerNavigator(
               onPress={() => {
                 dispatch(authActions.logout());
                 props.navigation.navigate("Auth");
+              }}
+            />
+            <Button
+              title="Delete Account"
+              color={"red"}
+              onPress={() => {
+                Alert.alert(
+                  'Are you sure you wish to delete your account?',
+                  'This can not be reversed',
+                  [
+                    {text: 'Cancel', onPress: () => console.log('Deleting Account Cancelled'), style: 'cancel'},
+                    {text: 'Delete', onPress: () => {
+                      dispatch(authActions.deleteUser())
+                      props.navigation.navigate("Auth")
+                    }, style: 'destructive'}
+                  ],
+                  { cancelable: false }
+                )
               }}
             />
           </SafeAreaView>

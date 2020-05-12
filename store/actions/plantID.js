@@ -1,86 +1,213 @@
-export const IDENTIFY_PLANT = "IDENTIFY_PLANT";
-export const CHECK_IDENTIFICATION = "CHECK_IDENTIFICATION";
+import { AsyncStorage, ImageStore } from "react-native";
 
-export const identifyPlant = (image64, latitude, longitude, userId) => {
-  return async (dispatch, getState) => {
-    //const token = getState().auth.token;
-    //const userId = getState().auth.userId;
-    const key = "16NJBlZVhom9201TsHZyUO3xy1qPouj80EvHQlc53klIM2tYu1";
-    key = "FAKEKEY";
+import Plant from "../../models/plant";
+
+export const SET_PLANTS = "SET_PLANTS";
+
+export const identifyPlant = (image, latitude, longitude, userId) => {
+  console.log();
+  return async () => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    console.log(image.base64.substring(0, 100));
     try {
-      const response = await fetch("https://api.plant.id/identify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          key,
-          image64,
-          latitude,
-          longitude
-        })
-      });
+      const response = await fetch(
+        "http://api.sherlock.uk:5000/identify_plant",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + jsonUserData.token,
+          },
+          body: JSON.stringify({
+            image: image.base64,
+            latitude: latitude,
+            longitude: longitude,
+          }),
+        }
+      );
 
       if (!response.ok) {
+        console.log(response.status);
+        const errorResData = await response.json();
+        console.log(errorResData);
         throw new Error("Something went Wrong!");
       }
 
       const resData = await response.json();
       console.log(resData);
 
-      dispatch({
-        type: IDENTIFY_PLANT,
-        plantData: {
-          id: resData.id,
-          imageUrl: imageUrl,
-          userId: userId
+      timeWaste = async () => {
+        return new Promise((resolve) =>
+          setTimeout(() => {
+            resolve("result");
+          }, 5000)
+        );
+      };
+
+      const timeWasteData = await this.timeWaste();
+
+      if (timeWasteData !== null) {
+        if (resData.suggestions.length < 1) {
+          console.log("error: 0 suggestions");
+        } else {
+          await savePlantToDatabase(
+            userId,
+            resData.id,
+            resData.suggestions[0].plant.name,
+            resData.images[0].url,
+            resData.latitude,
+            resData.longitude,
+            resData.suggestions[0].plant.url,
+            resData.sent,
+            resData.suggestions[0].plant.common_name,
+            resData.suggestions[0].probability
+          );
         }
-      });
+      }
     } catch (err) {
+      console.log(err);
       throw err;
     }
   };
 };
 
-export const checkIdentification = (imageUrl, id, userId) => {
-  return async (dispatch, getState) => {
-    //const token = getState().auth.token;
-    //const userId = getState().auth.userId;
-    const key = "16NJBlZVhom9201TsHZyUO3xy1qPouj80EvHQlc53klIM2tYu1";
-    key = "FAKEKEY";
-    const response = await fetch("https://api.plant.id/check_identifications", {
+const savePlantToDatabase = async (
+  userId,
+  plantId,
+  plantName,
+  imageUrl,
+  latitude,
+  longitude,
+  plantInfoUrl,
+  dateTimeFound,
+  commonName,
+  probability
+) => {
+  console.log("inside savePlant to Database with userId: " + userId);
+  const userData = await AsyncStorage.getItem("userData");
+  const jsonUserData = JSON.parse(userData);
+
+  console.log("plantId = " + plantId);
+  console.log("plantName = " + plantName);
+  console.log("imageUrl = " + imageUrl);
+  console.log("latitude = " + latitude);
+  console.log("longitude = " + longitude);
+  console.log("plantInfoUrl = " + plantInfoUrl);
+  console.log("commonName = " + commonName);
+  console.log("probability = " + probability);
+  try {
+    console.log("inside savePlantToDatabase");
+    const date = new Date(dateTimeFound * 1000);
+    const dateFormatted = date.toISOString().slice(0, 19).replace('T', ' ');
+    console.log("dateTimeFOund = " + dateFormatted);
+    const response = await fetch("http://api.sherlock.uk:5000/add_plant", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + jsonUserData.token,
       },
       body: JSON.stringify({
-        key: Key,
-        ids: id
-      })
+        userId: userId.toString(),
+        plantId: plantId.toString(),
+        plantName: plantName.toString(),
+        imageUrl: imageUrl.toString(),
+        latitude: latitude,
+        longitude: longitude,
+        plantInfoUrl: plantInfoUrl.toString(),
+        dateTimeFound: dateFormatted.toString(),
+        commonName: commonName.toString(),
+        probability: probability,
+      }),
     });
 
     if (!response.ok) {
       let message = "Something went wrong!";
+      if (response.status == 500) {
+        const errorResData = await response.text();
+        console.log(errorResData);
+        message = "Internal Server Error";
+      } else if (response.status == 400) {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        message = errorResData.msg;
+      } else {
+        const errorResData = await response.json();
+        console.log(errorResData);
+        const errorId = errorResData.msg;
+        if (errorId === "User doesn't exist") {
+          message = errorId;
+        }
+      }
       throw new Error(message);
     }
-
     const resData = await response.json();
     console.log(resData);
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
 
-    dispatch({
-      type: CHECK_IDENTIFICATION,
-      plantData: {
-        id: resData.id,
-        userId: userId,
-        plantName: resData.plant.name,
-        imageUrl: imageUrl,
-        latitude: resData.latitude,
-        longitude: resData.longitude,
-        plantInfoUrl: resData.plant.url,
-        time: resData.sent,
-        commonName: resData.plant.common_name,
-        probability: resData.probability
+export const getUserPlants = () => {
+  return async (dispatch) => {
+    const userData = await AsyncStorage.getItem("userData");
+    const jsonUserData = JSON.parse(userData);
+    try {
+      const response = await fetch(
+        "http://api.sherlock.uk:5000/get_user_plants",
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + jsonUserData.token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        let message = "Something went wrong!";
+        if (response.status == 500) {
+          const errorResData = await response.text();
+          console.log(errorResData);
+          message = "Internal Server Error";
+        } else {
+          const errorResData = await response.json();
+          console.log(errorResData);
+        }
+        throw new Error(message);
       }
-    });
+
+      const resData = await response.json();
+      console.log(resData);
+      const userPlants = [];
+
+      for (const key in resData) {
+        userPlants.push(
+          new Plant(
+            resData[key].plantId,
+            resData[key].userId,
+            resData[key].plantName,
+            resData[key].imageUrl,
+            resData[key].latitude,
+            resData[key].longitude,
+            resData[key].plantInfoUrl,
+            resData[key].dateTimeFound,
+            resData[key].commonName,
+            resData[key].probability,
+            resData[key].points
+          )
+        );
+      }
+
+      dispatch({
+        type: SET_PLANTS,
+        //maybe remove plants and loadedPlants
+        plants: [],
+        userPlants: userPlants,
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   };
 };
