@@ -51,7 +51,7 @@ const CameraScreen = (props) => {
           return new Promise((resolve) =>
             setTimeout(() => {
               resolve("result");
-            }, 20000)
+            }, 7000)
           );
         };
 

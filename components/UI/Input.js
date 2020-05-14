@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet } from "react-native";
 
 const INPUT_CHANGE = "INPUT_CHANGE";
 const INPUT_BLUR = "INPUT_BLUR";
+const INPUT_RESET = "INPUT_RESET";
 
 const inputReducer = (state, action) => {
   switch (action.type) {
@@ -12,6 +13,11 @@ const inputReducer = (state, action) => {
         value: action.value,
         isValid: action.isValid
       };
+    case INPUT_RESET:
+      return {
+        value: "",
+        isValid: false
+      }
     case INPUT_BLUR:
       return {
         ...state,

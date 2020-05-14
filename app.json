@@ -5,17 +5,15 @@
     "privacy": "public",
     "sdkVersion": "36.0.0",
     "platforms": [
-      "ios",
-      "android",
-      "web"
+      "android"
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/plantIcon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/plantIconWhite.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#008000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

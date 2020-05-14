@@ -1,4 +1,4 @@
-import { AsyncStorage, ImageStore } from "react-native";
+import { AsyncStorage } from "react-native";
 
 import Plant from "../../models/plant";
 
@@ -201,8 +201,6 @@ export const getUserPlants = () => {
 
       dispatch({
         type: SET_PLANTS,
-        //maybe remove plants and loadedPlants
-        plants: [],
         userPlants: userPlants,
       });
     } catch (err) {

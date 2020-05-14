@@ -7,11 +7,13 @@ import ReduxThunk from 'redux-thunk';
 
 import plantIDReducer from './store/reducers/plantID';
 import authReducer from './store/reducers/auth';
+import scoreBoardReducer from './store/reducers/scoreBoard';
 import NavigationContainer from './navigation/NavigationContainer';
 
 const rootReducer = combineReducers({
   plantID: plantIDReducer,
-  auth: authReducer
+  auth: authReducer,
+  scoreBoard: scoreBoardReducer
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

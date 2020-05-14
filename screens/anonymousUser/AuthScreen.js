@@ -19,6 +19,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import * as authActions from "../../store/actions/auth";
 
 const FORM_INPUT_UPDATE = "FORM_INPUT_UPDATE";
+const FORM_RESET = "FORM_RESET";
 
 const formReducer = (state, action) => {
   if (action.type === FORM_INPUT_UPDATE) {
@@ -40,6 +41,26 @@ const formReducer = (state, action) => {
       inputValues: updatedValues
     };
   }
+  else if (action.type === FORM_RESET) {
+    const resetValues = {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    };
+    const resetValidities = {
+      name: false,
+      email: false,
+      password: false,
+      confirmPassword: false
+    };
+    const resetFormIsValid = false;
+    return {
+      formIsValid: resetFormIsValid,
+      inputValidities: resetValidities,
+      inputValues: resetValues
+    };
+  }
   return state;
 };
 
@@ -48,6 +69,17 @@ const AuthScreen = props => {
   const [error, setError] = useState();
   const [isRegister, setIsRegister] = useState(false);
   const dispatch = useDispatch();
+
+  const resetForm = useCallback(() => {
+    console.log("inside resetForm");
+    dispatchFormState({
+      type: FORM_RESET,
+    });
+  }, [isRegister]);
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   const [formState, dispatchFormState] = useReducer(formReducer, {
     inputValues: {
@@ -66,7 +98,6 @@ const AuthScreen = props => {
   });
 
   const authHandler = async () => {
-    //props.navigation.navigate("LeaderBoard");
     setError(null);
     console.log(formState);
     let action;
@@ -131,7 +162,6 @@ const AuthScreen = props => {
     [dispatchFormState]
   );
 
-  //TODO: ADD TABBING BETWEEN TEXT INPUTS
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -254,7 +284,6 @@ const AuthScreen = props => {
   );
 };
 
-//This needs changing to allow for registration at some point, likely using redux states
 AuthScreen.navigationOptions = {
   headerTitle: "PlantAlot"
 };

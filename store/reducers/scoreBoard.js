@@ -1,14 +1,14 @@
-import { SET_PLANTS } from "../actions/plantID";
+import { SET_SCOREBOARD } from "../actions/scoreBoard";
 
 const initialState = {
-  userPlants: []
+  scoreBoardData: []
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case SET_PLANTS:
+    case SET_SCOREBOARD:
       return {
-        userPlants: action.userPlants
+        scoreBoardData: action.scoreBoardData
       };
     default:
       return state;

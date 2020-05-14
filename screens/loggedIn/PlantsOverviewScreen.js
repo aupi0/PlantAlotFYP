@@ -30,7 +30,6 @@ const PlantsOverviewScreen = props => {
     setIsRefreshing(true);
     try {
       await dispatch(plantIDActions.getUserPlants());
-      console.log("after getUserPlants");
     } catch (err) {
       setError(err.message);
       console.log(err.message);
