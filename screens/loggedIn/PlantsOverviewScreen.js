@@ -103,12 +103,11 @@ const PlantsOverviewScreen = props => {
     );
   }
 
-  const orderdUserPlants = userPlants.reverse();
   return (
     <FlatList
       onRefresh={loadPlants}
       refreshing={isRefreshing}
-      data={orderdUserPlants}
+      data={userPlants}
       keyExtractor={item => item.plantId}
       renderItem={itemData => (
         <PlantInstance

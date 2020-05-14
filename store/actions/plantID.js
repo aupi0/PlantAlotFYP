@@ -201,7 +201,7 @@ export const getUserPlants = () => {
 
       dispatch({
         type: SET_PLANTS,
-        userPlants: userPlants,
+        userPlants: userPlants.reverse(),
       });
     } catch (err) {
       console.log(err);
