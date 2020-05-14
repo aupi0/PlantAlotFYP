@@ -19,7 +19,6 @@ const LeaderBoardScreen = props => {
   const [userPosition, setUserPosition] = useState(null);
   const [username, setUsername] = useState(null);
   const [userPoints, setUserPoints] = useState(null);
-  const [formattedData, setFormattedData] = useState();
   const dispatch = useDispatch();
 
   useEffect(() => {
