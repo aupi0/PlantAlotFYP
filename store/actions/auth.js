@@ -149,7 +149,7 @@ export const deleteUser = () => {
       const resData = await response.json();
       console.log(resData);
 
-      await logout();
+      logout();
     } catch (err) {
       console.log(err);
       throw err;

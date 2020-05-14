@@ -71,7 +71,6 @@ const AuthScreen = props => {
   const dispatch = useDispatch();
 
   const resetForm = useCallback(() => {
-    console.log("inside resetForm");
     dispatchFormState({
       type: FORM_RESET,
     });

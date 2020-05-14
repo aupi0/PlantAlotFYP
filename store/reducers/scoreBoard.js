@@ -1,4 +1,4 @@
-import { SET_SCOREBOARD } from "../actions/scoreBoard";
+import { SET_SCOREBOARD, CLEAR_SCOREBOARD } from "../actions/scoreBoard";
 
 const initialState = {
   scoreBoardData: []
