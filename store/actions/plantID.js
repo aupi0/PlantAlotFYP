@@ -3,6 +3,7 @@ import { AsyncStorage } from "react-native";
 import Plant from "../../models/plant";
 
 export const SET_PLANTS = "SET_PLANTS";
+export const LOGOUT = "LOGOUT";
 
 export const identifyPlant = (image, latitude, longitude, userId) => {
   console.log();
@@ -207,5 +208,11 @@ export const getUserPlants = () => {
       console.log(err);
       throw err;
     }
+  };
+};
+
+export const logout = (dispatch) => {
+  return dispatch => {
+    dispatch({ type: LOGOUT });
   };
 };

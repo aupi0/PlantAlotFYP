@@ -1,15 +1,21 @@
-import { SET_SCOREBOARD, CLEAR_SCOREBOARD } from "../actions/scoreBoard";
+import { SET_SCOREBOARD, LOGOUT } from "../actions/scoreBoard";
 
 const initialState = {
-  scoreBoardData: []
+  scoreBoardData: [],
+  points: null,
+  position: null
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
     case SET_SCOREBOARD:
       return {
-        scoreBoardData: action.scoreBoardData
+        scoreBoardData: action.scoreBoardData,
+        points: action.points,
+        position: action.position
       };
+    case LOGOUT:
+      return initialState;
     default:
       return state;
   }

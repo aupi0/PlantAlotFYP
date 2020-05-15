@@ -113,6 +113,7 @@ export const login = (email, password) => {
     const resData = await response.json();
     console.log(resData);
     saveTokenToStorage(resData.accessToken);
+    authenticate();
   };
 };
 

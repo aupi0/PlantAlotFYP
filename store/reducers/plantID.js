@@ -1,15 +1,17 @@
-import { SET_PLANTS } from "../actions/plantID";
+import { SET_PLANTS, LOGOUT } from "../actions/plantID";
 
 const initialState = {
-  userPlants: []
+  userPlants: [],
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
     case SET_PLANTS:
       return {
-        userPlants: action.userPlants
+        userPlants: action.userPlants,
       };
+    case LOGOUT:
+      return initialState;
     default:
       return state;
   }

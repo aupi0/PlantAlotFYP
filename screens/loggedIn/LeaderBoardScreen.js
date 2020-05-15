@@ -14,6 +14,7 @@ import LeaderBoard from "react-native-leaderboard";
 import HeaderButton from "../../components/UI/HeaderButton";
 import Colors from "../../constants/Colours";
 import * as scoreBoardActions from "../../store/actions/scoreBoard";
+import * as plantIDActions from "../../store/actions/plantID";
 import * as authActions from "../../store/actions/auth";
 import Colours from "../../constants/Colours";
 
@@ -25,8 +26,8 @@ const LeaderBoardScreen = (props) => {
   );
   const userId = useSelector((state) => state.auth.userId);
   const username = useSelector((state) => state.auth.name);
-  const [userPosition, setUserPosition] = useState(null);
-  const [userPoints, setUserPoints] = useState(null);
+  const userPoints = useSelector((state) => state.scoreBoard.points);
+  const userPosition = useSelector((state) => state.scoreBoard.position);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const LeaderBoardScreen = (props) => {
         return;
       } else {
         try {
-          await dispatch(authActions.authenticate());
+          dispatch(authActions.authenticate());
         } catch (err) {
           console.log(err);
           props.navigation.navigate("Auth");
@@ -47,45 +48,23 @@ const LeaderBoardScreen = (props) => {
     tryAuth();
   }, [dispatch]);
 
-  const loadUserStats = useCallback(async () => {
-    const userIndex = scoreBoardData.findIndex((item) => {
-      return item.user_id === userId;
-    });
-    if (userIndex >= 0) {
-      setUserPosition(scoreBoardData[userIndex].position);
-      setUserPoints(scoreBoardData[userIndex].points);
-    }
-  }, [scoreBoardData]);
-
   const loadScoreBoard = useCallback(async () => {
     setError(null);
     try {
-      dispatch(scoreBoardActions.getScoreBoard());
+      dispatch(scoreBoardActions.getScoreBoard(userId));
     } catch (err) {
       setError(err.message);
       console.log(err.message);
     }
-  }, [dispatch, setIsLoading, setError]);
+  }, [dispatch, setIsLoading, setError, userId]);
 
   useEffect(() => {
+    console.log("isnide score effect");
     setIsLoading(true);
-    setUserPoints(null);
-    setUserPosition(null);
     loadScoreBoard().then(() => {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+      setIsLoading(false);
     });
   }, [dispatch, loadScoreBoard]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    loadUserStats().then(() => {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    });
-  }, [loadUserStats]);
 
   if (error) {
     console.log(error);
@@ -101,7 +80,7 @@ const LeaderBoardScreen = (props) => {
     );
   }
 
-  if (isLoading || !scoreBoardData || !username || !userPoints || !userPosition) {
+  if (isLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -174,6 +153,8 @@ LeaderBoardScreen.navigationOptions = (navData) => {
           iconName={"ios-log-out"}
           onPress={() => {
             authActions.logout();
+            plantIDActions.logout();
+            scoreBoardActions.logout();
             navData.navigation.navigate("Auth");
           }}
         />

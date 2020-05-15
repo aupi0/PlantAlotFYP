@@ -14,6 +14,7 @@ import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import * as plantIDActions from "../../store/actions/plantID";
 import * as authActions from "../../store/actions/auth";
+import * as scoreBoardActions from "../../store/actions/scoreBoard";
 import HeaderButton from "../../components/UI/HeaderButton";
 import Colors from "../../constants/Colours";
 
@@ -67,6 +68,8 @@ PlantDetailScreen.navigationOptions = (navData) => {
           iconName={"ios-log-out"}
           onPress={() => {
             authActions.logout();
+            plantIDActions.logout();
+            scoreBoardActions.logout();
             navData.navigation.navigate("Auth");
           }}
         />

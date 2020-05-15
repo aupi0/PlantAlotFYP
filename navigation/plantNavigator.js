@@ -15,6 +15,8 @@ import AuthScreen from "../screens/anonymousUser/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Colours from "../constants/Colours";
 import * as authActions from "../store/actions/auth";
+import * as scoreBoardActions from "../store/actions/scoreBoard";
+import * as plantIDActions from "../store/actions/plantID";
 
 const defaultNavOptions = {
   headerStyle: {
@@ -103,6 +105,8 @@ const PlantDrawNavigator = createDrawerNavigator(
               color={Colours.primary}
               onPress={() => {
                 dispatch(authActions.logout());
+                dispatch(plantIDActions.logout());
+                dispatch(scoreBoardActions.logout());
                 props.navigation.navigate("Auth");
               }}
             />

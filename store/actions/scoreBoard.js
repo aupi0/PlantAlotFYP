@@ -2,8 +2,9 @@ import { AsyncStorage } from "react-native";
 
 export const SET_SCOREBOARD = "SET_SCOREBOARD";
 export const CLEAR_SCOREBOARD = "CLEAR_SCOREBOARD";
+export const LOGOUT = "LOGOUT";
 
-export const getScoreBoard = () => {
+export const getScoreBoard = (userId) => {
   return async (dispatch) => {
     const userData = await AsyncStorage.getItem("userData");
     const jsonUserData = JSON.parse(userData);
@@ -34,13 +35,30 @@ export const getScoreBoard = () => {
       const resData = await response.json();
       console.log(resData);
 
-      dispatch({
-        type: SET_SCOREBOARD,
-        scoreBoardData: resData,
+      const userIndex = resData.findIndex((item) => {
+        return item.user_id === userId;
       });
+      if (userIndex >= 0) {
+        const position = resData[userIndex].position;
+        const points = resData[userIndex].points;
+
+        dispatch({
+          type: SET_SCOREBOARD,
+          scoreBoardData: resData,
+          points: points,
+          position: position
+        });
+      }
+      
     } catch (err) {
       console.log(err);
       throw err;
     }
+  };
+};
+
+export const logout = (dispatch) => {
+  return dispatch => {
+    dispatch({ type: LOGOUT });
   };
 };
