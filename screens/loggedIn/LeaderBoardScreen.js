@@ -6,6 +6,7 @@ import {
   Button,
   ActivityIndicator,
   AsyncStorage,
+  FlatList
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -20,6 +21,7 @@ import Colours from "../../constants/Colours";
 
 const LeaderBoardScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
   const scoreBoardData = useSelector(
     (state) => state.scoreBoard.scoreBoardData
@@ -50,12 +52,14 @@ const LeaderBoardScreen = (props) => {
 
   const loadScoreBoard = useCallback(async () => {
     setError(null);
+    setIsRefreshing(true);
     try {
       dispatch(scoreBoardActions.getScoreBoard(userId));
     } catch (err) {
       setError(err.message);
       console.log(err.message);
     }
+    setIsRefreshing(false);
   }, [dispatch, setIsLoading, setError, userId]);
 
   useEffect(() => {
@@ -103,32 +107,41 @@ const LeaderBoardScreen = (props) => {
   };
 
   return (
-    <View style={styles.screen}>
-      <View color={Colours.primary} style={styles.header}>
-        <Text style={styles.title} color={Colours.primary}>
-          Leaderboard
-        </Text>
-        <View style={styles.userStats}>
-          <Text style={styles.position} color={Colours.primary}>
-            {ordinalSuffix(userPosition)}
-          </Text>
-          <Text style={styles.name} color={Colours.primary}>
-            {username}
-          </Text>
-          <Text style={styles.points} color={Colors.primary}>
-            {userPoints}pts
-          </Text>
+    <FlatList
+      onRefresh={loadScoreBoard}
+      refreshing={isRefreshing}
+      data={scoreBoardData}
+      keyExtractor={(item) => item.user_id}
+      contentContainerStyle={styles.centered}
+      renderItem={() => (
+        <View style={styles.screen}>
+          <View color={Colours.primary} style={styles.header}>
+            <Text style={styles.title} color={Colours.primary}>
+              Leaderboard
+            </Text>
+            <View style={styles.userStats}>
+              <Text style={styles.position} color={Colours.primary}>
+                {ordinalSuffix(userPosition)}
+              </Text>
+              <Text style={styles.name} color={Colours.primary}>
+                {username}
+              </Text>
+              <Text style={styles.points} color={Colors.primary}>
+                {userPoints}pts
+              </Text>
+            </View>
+          </View>
+          <View styles={{ width: "50%" }}>
+            <LeaderBoard
+              data={scoreBoardData}
+              sortBy="points"
+              labelBy="name"
+              containerStyle={{ width: "80%" }}
+            />
+          </View>
         </View>
-      </View>
-      <View styles={{ width: "50%" }}>
-        <LeaderBoard
-          data={scoreBoardData}
-          sortBy="points"
-          labelBy="name"
-          containerStyle={{ width: "80%" }}
-        />
-      </View>
-    </View>
+      )}
+    />
   );
 };
 

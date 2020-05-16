@@ -24,6 +24,8 @@ const PlantsOverviewScreen = props => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
   const userPlants = useSelector(state => state.plantID.userPlants);
+  const emptyMessage = [{text: "No Plants found for this User. Maybe Try adding some!"}];
+  const errorMessage = [{text: "It Appears an error occurred!"}];
   const dispatch = useDispatch();
 
   const loadPlants = useCallback(async () => {
@@ -81,10 +83,19 @@ const PlantsOverviewScreen = props => {
   if (error) {
     console.log(error);
     return (
-      <View style={styles.centered}>
-        <Text>It Appears an error occurred!</Text>
-        <Button title="Try Again" onPress={loadPlants} color={Colors.primary} />
-      </View>
+      <FlatList
+        onRefresh={loadPlants}
+        refreshing={isRefreshing}
+        data={errorMessage}
+        keyExtractor={item => item.text}
+        contentContainerStyle={styles.centered}
+        renderItem={itemData => (
+          <View>
+            <Text>{itemData.item.text}</Text>
+            <Button title="Try Again" onPress={loadPlants} color={Colors.primary} />
+          </View>
+        )}
+      />
     );
   }
 
@@ -98,9 +109,16 @@ const PlantsOverviewScreen = props => {
 
   if (!isLoading && userPlants.length === 0) {
     return (
-      <View style={styles.centered}>
-        <Text>No Plants found for this User. Maybe Try adding some!</Text>
-      </View>
+        <FlatList
+        onRefresh={loadPlants}
+        refreshing={isRefreshing}
+        data={emptyMessage}
+        keyExtractor={item => item.text}
+        contentContainerStyle={styles.centered}
+        renderItem={itemData => (
+          <Text>{itemData.item.text}</Text>
+        )}
+    />
     );
   }
 
