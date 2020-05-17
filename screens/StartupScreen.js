@@ -22,7 +22,7 @@ const StartupScreen = props => {
       } else {
           try {
             await dispatch(authActions.authenticate());
-            props.navigation.navigate('LeaderBoard');
+            props.navigation.navigate('Leaderboard');
           } catch (err) {
             console.log(err);
             props.navigation.navigate('Auth');

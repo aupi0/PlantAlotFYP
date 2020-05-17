@@ -128,7 +128,7 @@ const CameraScreen = (props) => {
           <TouchableOpacity
             style={styles.close}
             onPress={() => {
-              props.navigation.navigate("LeaderBoard");
+              props.navigation.navigate("Leaderboard");
             }}
           >
             <Ionicons name="md-close" style={styles.icons} />

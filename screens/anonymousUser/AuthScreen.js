@@ -7,7 +7,9 @@ import {
   Button,
   Text,
   ActivityIndicator,
-  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
@@ -139,7 +141,7 @@ const AuthScreen = (props) => {
           setIsRegister(false);
           setIsLoading(false);
         } else {
-          props.navigation.navigate("LeaderBoard");
+          props.navigation.navigate("Leaderboard");
         }
       } catch (err) {
         console.log(err);
@@ -286,10 +288,106 @@ const AuthScreen = (props) => {
   if (isRegister) {
     return (
       <KeyboardAvoidingView
-        behavior="padding"
-        keyboardVerticalOffset={30}
+        behavior="height"
+        keyboardVerticalOffset={StatusBar.currentHeight + 30}
         style={styles.screen}
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <LinearGradient
+            colors={["#D2F8F2", "#7CFC00", "#228B22"]}
+            style={styles.gradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Card style={styles.authContainer}>
+              <ScrollView>
+                <Text style={styles.error}>{!error ? "" : error}</Text>
+                <View>
+                  <Input
+                    id="name"
+                    label="Name"
+                    keyboardType="default"
+                    required
+                    autoCapitalize="words"
+                    minLength={1}
+                    errorText="Please enter a valid Name."
+                    onInputChange={inputChanceHandler}
+                    initialValue=""
+                  />
+                  <Input
+                    id="email"
+                    label="E-mail"
+                    keyboardType="email-address"
+                    required
+                    email
+                    autoCapitalize="none"
+                    errorText="Please enter a valid Email Address."
+                    onInputChange={inputChanceHandler}
+                    initialValue=""
+                  />
+                  <Input
+                    id="password"
+                    label="Password"
+                    keyboardType="default"
+                    secureTextEntry
+                    required
+                    minLength={5}
+                    autoCapitalize="none"
+                    errorText="Please enter a valid Password."
+                    onInputChange={inputChanceHandler}
+                    initialValue=""
+                  />
+                  <Input
+                    id="confirmPassword"
+                    label="Confirm Password"
+                    keyboardType="default"
+                    secureTextEntry
+                    required
+                    minLength={5}
+                    autoCapitalize="none"
+                    errorText="Please enter a valid Confirmation Password."
+                    onInputChange={inputChanceHandler}
+                    initialValue=""
+                  />
+                </View>
+                <View style={styles.buttonContainer}>
+                  {isLoading ? (
+                    <ActivityIndicator size="small" />
+                  ) : (
+                    <Button
+                      title="Register"
+                      color={Colours.primary}
+                      onPress={authHandler}
+                    />
+                  )}
+                </View>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsRegister(false);
+                    }}
+                  >
+                    <View style={styles.secondButtonContainer}>
+                      <Text style={styles.secondButton}>Switch to Login</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+              <View style={{ flex: 1 }} />
+            </Card>
+          </LinearGradient>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior="height"
+      keyboardVerticalOffset={StatusBar.currentHeight + 30}
+      style={styles.screen}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <LinearGradient
           colors={["#D2F8F2", "#7CFC00", "#228B22"]}
           style={styles.gradient}
@@ -300,17 +398,6 @@ const AuthScreen = (props) => {
             <ScrollView>
               <Text style={styles.error}>{!error ? "" : error}</Text>
               <View>
-                <Input
-                  id="name"
-                  label="Name"
-                  keyboardType="default"
-                  required
-                  autoCapitalize="words"
-                  minLength={1}
-                  errorText="Please enter a valid Name."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
                 <Input
                   id="email"
                   label="E-mail"
@@ -334,25 +421,13 @@ const AuthScreen = (props) => {
                   onInputChange={inputChanceHandler}
                   initialValue=""
                 />
-                <Input
-                  id="confirmPassword"
-                  label="Confirm Password"
-                  keyboardType="default"
-                  secureTextEntry
-                  required
-                  minLength={5}
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Confirmation Password."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
               </View>
               <View style={styles.buttonContainer}>
                 {isLoading ? (
                   <ActivityIndicator size="small" />
                 ) : (
                   <Button
-                    title="Register"
+                    title="Login"
                     color={Colours.primary}
                     onPress={authHandler}
                   />
@@ -361,88 +436,21 @@ const AuthScreen = (props) => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   onPress={() => {
-                    setIsRegister(false);
+                    setIsRegister(true);
                   }}
                 >
                   <View style={styles.secondButtonContainer}>
-                    <Text style={styles.secondButton}>Switch to Login</Text>
+                    <Text style={styles.secondButton}>
+                      Switch to Registration
+                    </Text>
                   </View>
                 </TouchableOpacity>
               </View>
             </ScrollView>
+            <View style={{ flex: 1 }} />
           </Card>
         </LinearGradient>
-      </KeyboardAvoidingView>
-    );
-  }
-
-  return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      keyboardVerticalOffset={30}
-      style={styles.screen}
-    >
-      <LinearGradient
-        colors={["#D2F8F2", "#7CFC00", "#228B22"]}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Card style={styles.authContainer}>
-          <ScrollView>
-            <Text style={styles.error}>{!error ? "" : error}</Text>
-            <View>
-              <Input
-                id="email"
-                label="E-mail"
-                keyboardType="email-address"
-                required
-                email
-                autoCapitalize="none"
-                errorText="Please enter a valid Email Address."
-                onInputChange={inputChanceHandler}
-                initialValue=""
-              />
-              <Input
-                id="password"
-                label="Password"
-                keyboardType="default"
-                secureTextEntry
-                required
-                minLength={5}
-                autoCapitalize="none"
-                errorText="Please enter a valid Password."
-                onInputChange={inputChanceHandler}
-                initialValue=""
-              />
-            </View>
-            <View style={styles.buttonContainer}>
-              {isLoading ? (
-                <ActivityIndicator size="small" />
-              ) : (
-                <Button
-                  title="Login"
-                  color={Colours.primary}
-                  onPress={authHandler}
-                />
-              )}
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsRegister(true);
-                }}
-              >
-                <View style={styles.secondButtonContainer}>
-                  <Text style={styles.secondButton}>
-                    Switch to Registration
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </Card>
-      </LinearGradient>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
@@ -464,7 +472,9 @@ const styles = StyleSheet.create({
     width: "80%",
     maxWidth: 500,
     maxHeight: 500,
-    padding: 25,
+    paddingHorizontal: 25,
+    paddingBottom: 25,
+    justifyContent: "flex-end",
   },
   error: {
     color: "red",

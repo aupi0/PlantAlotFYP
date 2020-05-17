@@ -1,22 +1,18 @@
 import React from "react";
 import {
-  ScrollView,
   View,
   Text,
   Image,
-  Button,
   StyleSheet,
-  ProgressBarAndroidBase,
   Linking,
 } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import * as plantIDActions from "../../store/actions/plantID";
 import * as authActions from "../../store/actions/auth";
 import * as scoreBoardActions from "../../store/actions/scoreBoard";
 import HeaderButton from "../../components/UI/HeaderButton";
-import Colors from "../../constants/Colours";
 
 const PlantDetailScreen = (props) => {
   const plantId = props.navigation.getParam("plantId");
@@ -25,7 +21,6 @@ const PlantDetailScreen = (props) => {
   );
 
   return (
-    //Make scrollview if needed but stops plantId being bottem of screen
     <View style={styles.screen}>
       <Text style={styles.name}>{selectedPlant.plantName}</Text>
       <Image style={styles.image} source={{ uri: selectedPlant.imageUrl }} />

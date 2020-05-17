@@ -83,7 +83,7 @@ export const register = (name, email, password, confirmPassword) => {
 };
 
 export const login = (email, password) => {
-  return async (dispatch) => {
+  return async () => {
     const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
       headers: {
@@ -158,9 +158,9 @@ export const deleteUser = () => {
   };
 };
 
-export const logout = (dispatch) => {
+export const logout = () => {
   AsyncStorage.removeItem("userData");
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: LOGOUT });
   };
 };

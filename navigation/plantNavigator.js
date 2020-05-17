@@ -37,7 +37,7 @@ const plantStackNavigator = createStackNavigator(
 
 const stackNavigator = createStackNavigator(
   {
-    LeaderBoard: LeaderBoardScreen
+    Leaderboard: LeaderBoardScreen
   },
   {
     defaultNavigationOptions: defaultNavOptions
@@ -46,7 +46,7 @@ const stackNavigator = createStackNavigator(
 
 const PlantTabNavigator = createBottomTabNavigator(
   {
-    LeaderBoard: {
+    Leaderboard: {
       screen: stackNavigator,
       navigationOptions: {
         tabBarIcon: tabInfo => {
@@ -88,7 +88,7 @@ const PlantTabNavigator = createBottomTabNavigator(
 
 const PlantDrawNavigator = createDrawerNavigator(
   {
-    LeaderBoard: PlantTabNavigator
+    Leaderboard: PlantTabNavigator
   },
   {
     contentOptions: {

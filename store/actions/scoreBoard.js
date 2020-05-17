@@ -49,7 +49,6 @@ export const getScoreBoard = (userId) => {
           position: position
         });
       }
-      
     } catch (err) {
       console.log(err);
       throw err;
@@ -57,8 +56,8 @@ export const getScoreBoard = (userId) => {
   };
 };
 
-export const logout = (dispatch) => {
-  return dispatch => {
+export const logout = () => {
+  return (dispatch) => {
     dispatch({ type: LOGOUT });
-  };
+  }
 };

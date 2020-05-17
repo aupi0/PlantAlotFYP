@@ -28,26 +28,6 @@ const PlantsOverviewScreen = props => {
   const errorMessage = [{text: "It Appears an error occurred!"}];
   const dispatch = useDispatch();
 
-  const loadPlants = useCallback(async () => {
-    setError(null);
-    setIsRefreshing(true);
-    try {
-      await dispatch(plantIDActions.getUserPlants());
-    } catch (err) {
-      setError(err.message);
-      console.log(err.message);
-    }
-    setIsRefreshing(false);
-  }, [dispatch, setIsLoading, setError]);
-
-  useEffect(() => {
-    const willFocusSub = props.navigation.addListener("willFocus", loadPlants);
-
-    return () => {
-      willFocusSub.remove();
-    };
-  }, [loadPlants]);
-
   useEffect(() => {
     const tryAuth = async () => {
       const userData = await AsyncStorage.getItem('userData');
@@ -66,6 +46,26 @@ const PlantsOverviewScreen = props => {
     tryAuth();
   }, [dispatch]);
 
+  const loadPlants = useCallback(async () => {
+    setError(null);
+    setIsRefreshing(true);
+    try {
+      dispatch(plantIDActions.getUserPlants());
+    } catch (err) {
+      setError(err.message);
+      console.log(err.message);
+    }
+    setIsRefreshing(false);
+  }, [dispatch, setIsLoading, setError]);
+
+  useEffect(() => {
+    const willFocusSub = props.navigation.addListener("willFocus", loadPlants);
+
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadPlants]);
+
   useEffect(() => {
     setIsLoading(true);
     loadPlants().then(() => {
@@ -73,10 +73,9 @@ const PlantsOverviewScreen = props => {
     });
   }, [dispatch, loadPlants]);
 
-  const selectPlantHandler = (id, plantName) => {
+  const selectPlantHandler = (id) => {
     props.navigation.navigate("PlantDetail", {
-      plantId: id,
-      plantName: plantName
+      plantId: id
     });
   };
 
@@ -137,16 +136,9 @@ const PlantsOverviewScreen = props => {
           longitude={itemData.item.longitude}
           dateTimeFound={itemData.item.dateTimeFound}
           onSelect={() => {
-            selectPlantHandler(itemData.item.plantId, itemData.item.plantName);
+            selectPlantHandler(itemData.item.plantId);
           }}
         >
-          <Button
-            color={Colors.primary}
-            title="View Details"
-            onPress={() => {
-              selectPlantHandler(itemData.item.id, itemData.item.plantName);
-            }}
-          />
         </PlantInstance>
       )}
     />

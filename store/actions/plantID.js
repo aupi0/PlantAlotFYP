@@ -100,7 +100,7 @@ const savePlantToDatabase = async (
   try {
     console.log("inside savePlantToDatabase");
     const date = new Date(dateTimeFound * 1000);
-    const dateFormatted = date.toISOString().slice(0, 19).replace('T', ' ');
+    const dateFormatted = date.toISOString().slice(0, 19).replace("T", " ");
     console.log("dateTimeFOund = " + dateFormatted);
     const response = await fetch("http://api.sherlock.uk:5000/add_plant", {
       method: "POST",
@@ -211,8 +211,8 @@ export const getUserPlants = () => {
   };
 };
 
-export const logout = (dispatch) => {
-  return dispatch => {
+export const logout = () => {
+  return (dispatch) => {
     dispatch({ type: LOGOUT });
   };
 };

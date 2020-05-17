@@ -6,7 +6,7 @@ import {
   Button,
   ActivityIndicator,
   AsyncStorage,
-  FlatList
+  FlatList,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -30,6 +30,7 @@ const LeaderBoardScreen = (props) => {
   const username = useSelector((state) => state.auth.name);
   const userPoints = useSelector((state) => state.scoreBoard.points);
   const userPosition = useSelector((state) => state.scoreBoard.position);
+  const errorData = [{ text: "It Appears an error occurred!" }];
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -63,34 +64,22 @@ const LeaderBoardScreen = (props) => {
   }, [dispatch, setIsLoading, setError, userId]);
 
   useEffect(() => {
-    console.log("isnide score effect");
+    const willFocusSub = props.navigation.addListener(
+      "willFocus",
+      loadScoreBoard
+    );
+
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadScoreBoard]);
+
+  useEffect(() => {
     setIsLoading(true);
     loadScoreBoard().then(() => {
       setIsLoading(false);
     });
   }, [dispatch, loadScoreBoard]);
-
-  if (error) {
-    console.log(error);
-    return (
-      <View style={styles.centered}>
-        <Text>It Appears an error occurred!</Text>
-        <Button
-          title="Try Again"
-          onPress={loadScoreBoard}
-          color={Colors.primary}
-        />
-      </View>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
-    );
-  }
 
   const ordinalSuffix = (i) => {
     const j = i % 10;
@@ -106,42 +95,76 @@ const LeaderBoardScreen = (props) => {
     }
   };
 
-  return (
-    <FlatList
-      onRefresh={loadScoreBoard}
-      refreshing={isRefreshing}
-      data={scoreBoardData}
-      keyExtractor={(item) => item.user_id}
-      contentContainerStyle={styles.centered}
-      renderItem={() => (
-        <View style={styles.screen}>
-          <View color={Colours.primary} style={styles.header}>
-            <Text style={styles.title} color={Colours.primary}>
-              Leaderboard
-            </Text>
-            <View style={styles.userStats}>
-              <Text style={styles.position} color={Colours.primary}>
-                {ordinalSuffix(userPosition)}
-              </Text>
-              <Text style={styles.name} color={Colours.primary}>
-                {username}
-              </Text>
-              <Text style={styles.points} color={Colors.primary}>
-                {userPoints}pts
-              </Text>
-            </View>
-          </View>
-          <View styles={{ width: "50%" }}>
-            <LeaderBoard
-              data={scoreBoardData}
-              sortBy="points"
-              labelBy="name"
-              containerStyle={{ width: "80%" }}
+  if (error) {
+    console.log(error);
+    return (
+      <View style={styles.centered}>
+        <Text>It Appears an error occured!</Text>
+      </View>
+      /*<FlatList
+        onRefresh={loadScoreBoard}
+        refreshing={isRefreshing}
+        data={errorMessage}
+        keyExtractor={(item) => item.text}
+        contentContainerStyle={styles.centered}
+        renderItem={(itemData) => (
+          <View>
+            <Text>{itemData.item.text}</Text>
+            <Button
+              title="Try Again"
+              onPress={loadScoreBoard}
+              color={Colors.primary}
             />
           </View>
-        </View>
-      )}
-    />
+        )}
+      />*/
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.screen}>
+      <FlatList
+        onRefresh={loadScoreBoard}
+        refreshing={isRefreshing}
+        data={errorData}
+        keyExtractor={(item) => item.text}
+        renderItem={() => (
+          <View>
+            <View color={Colours.primary} style={styles.header}>
+              <Text style={styles.title} color={Colours.primary}>
+                Leaderboard
+              </Text>
+              <View style={styles.userStats}>
+                <Text style={styles.position} color={Colours.primary}>
+                  {ordinalSuffix(userPosition)}
+                </Text>
+                <Text style={styles.name} color={Colours.primary}>
+                  {username}
+                </Text>
+                <Text style={styles.points} color={Colors.primary}>
+                  {userPoints}pts
+                </Text>
+              </View>
+            </View>
+            <View>
+              <LeaderBoard
+                data={scoreBoardData}
+                sortBy="points"
+                labelBy="name"
+              />
+            </View>
+          </View>
+        )}
+      />
+    </View>
   );
 };
 
