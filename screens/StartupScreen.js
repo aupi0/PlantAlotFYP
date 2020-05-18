@@ -1,32 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   ActivityIndicator,
   StyleSheet,
-  AsyncStorage
-} from 'react-native';
-import { useDispatch } from 'react-redux';
+  AsyncStorage,
+} from "react-native";
+import { useDispatch } from "react-redux";
 
-import Colors from '../constants/Colours';
-import * as authActions from '../store/actions/auth';
+import Colors from "../constants/Colours";
+import * as authActions from "../store/actions/auth";
 
-const StartupScreen = props => {
+const StartupScreen = (props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const tryLogin = async () => {
-      const userData = await AsyncStorage.getItem('userData');
+      const userData = await AsyncStorage.getItem("userData");
       if (!userData) {
-        props.navigation.navigate('Auth');
+        props.navigation.navigate("Auth");
         return;
       } else {
-          try {
-            await dispatch(authActions.authenticate());
-            props.navigation.navigate('Leaderboard');
-          } catch (err) {
-            console.log(err);
-            props.navigation.navigate('Auth');
-          }
+        try {
+          await dispatch(authActions.authenticate());
+          props.navigation.navigate("Leaderboard");
+        } catch (err) {
+          console.log(err);
+          props.navigation.navigate("Auth");
+        }
       }
     };
     tryLogin();
@@ -42,9 +42,9 @@ const StartupScreen = props => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default StartupScreen;

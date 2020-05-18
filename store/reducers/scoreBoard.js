@@ -3,7 +3,7 @@ import { SET_SCOREBOARD, LOGOUT } from "../actions/scoreBoard";
 const initialState = {
   scoreBoardData: [],
   points: null,
-  position: null
+  position: null,
 };
 
 export default (state = initialState, action) => {
@@ -12,7 +12,7 @@ export default (state = initialState, action) => {
       return {
         scoreBoardData: action.scoreBoardData,
         points: action.points,
-        position: action.position
+        position: action.position,
       };
     case LOGOUT:
       return initialState;

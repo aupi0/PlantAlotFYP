@@ -100,7 +100,6 @@ const AuthScreen = (props) => {
 
   const authHandler = async () => {
     setError(null);
-    console.log(formState);
     let action;
     if (isRegister) {
       if (!formState.inputValidities.name) {
@@ -162,128 +161,6 @@ const AuthScreen = (props) => {
     },
     [dispatchFormState]
   );
-
-  /*return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      keyboardVerticalOffset={30}
-      style={styles.screen}
-    >
-      <LinearGradient
-        colors={["#D2F8F2", "#7CFC00", "#228B22"]}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Card style={styles.authContainer}>
-          <ScrollView>
-            <Text style={styles.error}>{!error ? "" : error}</Text>
-            {isRegister ? (
-              <View>
-                <Input
-                  id="name"
-                  label="Name"
-                  keyboardType="default"
-                  required
-                  autoCapitalize="words"
-                  minLength={1}
-                  errorText="Please enter a valid Name."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-                <Input
-                  id="email"
-                  label="E-mail"
-                  keyboardType="email-address"
-                  required
-                  email
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Email Address."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-                <Input
-                  id="password"
-                  label="Password"
-                  keyboardType="default"
-                  secureTextEntry
-                  required
-                  minLength={5}
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Password."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-                <Input
-                  id="confirmPassword"
-                  label="Confirm Password"
-                  keyboardType="default"
-                  secureTextEntry
-                  required
-                  minLength={5}
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Confirmation Password."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-              </View>
-            ) : (
-              <View>
-                <Input
-                  id="email"
-                  label="E-mail"
-                  keyboardType="email-address"
-                  required
-                  email
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Email Address."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-                <Input
-                  id="password"
-                  label="Password"
-                  keyboardType="default"
-                  secureTextEntry
-                  required
-                  minLength={5}
-                  autoCapitalize="none"
-                  errorText="Please enter a valid Password."
-                  onInputChange={inputChanceHandler}
-                  initialValue=""
-                />
-              </View>
-            )}
-            <View style={styles.buttonContainer}>
-              {isLoading ? (
-                <ActivityIndicator size="small" />
-              ) : (
-                <Button
-                  title={isRegister ? "Register" : "Login"}
-                  color="green"
-                  onPress={authHandler}
-                />
-              )}
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsRegister(isRegister ? false : true);
-                }}
-              >
-                <View style={styles.secondButtonContainer}>
-                  <Text style={styles.secondButton}>
-                    Switch to {isRegister ? "Login" : "Registration"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </Card>
-      </LinearGradient>
-    </KeyboardAvoidingView>
-  );
-}*/
 
   if (isRegister) {
     return (

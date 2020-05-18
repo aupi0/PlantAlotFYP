@@ -1,6 +1,5 @@
 import { AsyncStorage } from "react-native";
 
-export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
@@ -121,17 +120,13 @@ export const deleteUser = () => {
   return async (dispatch) => {
     const userData = await AsyncStorage.getItem("userData");
     const jsonUserData = JSON.parse(userData);
-    console.log("token: " + jsonUserData.token);
     try {
-      const response = await fetch(
-        "http://api.sherlock.uk:5000/delete_user",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: "Bearer " + jsonUserData.token,
-          },
-        }
-      );
+      const response = await fetch("http://api.sherlock.uk:5000/delete_user", {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + jsonUserData.token,
+        },
+      });
 
       if (!response.ok) {
         let message = "Something went wrong!";

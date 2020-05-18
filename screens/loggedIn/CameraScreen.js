@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { NavigationEvents } from 'react-navigation';
+import { NavigationEvents } from "react-navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
@@ -120,87 +120,85 @@ const CameraScreen = (props) => {
   return (
     <View style={styles.flex}>
       <NavigationEvents
-                 onWillFocus={payload => {
-                     console.log("will focus");
-                     setIsFocused(true);
-                 }}
-                 onDidBlur={payload => {
-                     console.log('did leave')
-                     setIsFocused(false)
-                 }}
-             />
+        onWillFocus={(payload) => {
+          setIsFocused(true);
+        }}
+        onDidBlur={(payload) => {
+          setIsFocused(false);
+        }}
+      />
       {isFocused ? (
-          <View style={styles.flex}>
-            <Camera
-              style={styles.flex}
-              type={type}
-              ref={(ref) => {
-                this.camera = ref;
-              }}
-            >
-              <View style={styles.topRow}>
-                <TouchableOpacity
-                  style={styles.close}
-                  onPress={() => {
-                    props.navigation.navigate("Leaderboard");
-                  }}
-                >
-                  <Ionicons name="md-close" style={styles.icons} />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.bottomRow}>
-                <TouchableOpacity
-                  style={styles.touchable}
-                  onPress={() => {
-                    setFlash(
-                      flash === Camera.Constants.FlashMode.on
-                        ? Camera.Constants.FlashMode.off
-                        : Camera.Constants.FlashMode.on
-                    );
-                  }}
-                >
-                  <Ionicons
-                    name={
-                      flash === Camera.Constants.FlashMode.on
-                        ? "ios-flash"
-                        : "ios-flash-off"
-                    }
-                    style={styles.icons}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.touchable} onPress={photo}>
-                  {isLoading ? (
-                    <ActivityIndicator size="small" />
-                  ) : (
-                    <Ionicons name="md-camera" style={styles.icons} />
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.touchable}
-                  onPress={() => {
-                    setType(
-                      type === Camera.Constants.Type.back
-                        ? Camera.Constants.Type.front
-                        : Camera.Constants.Type.back
-                    );
-                  }}
-                >
-                  <Ionicons name="md-reverse-camera" style={styles.icons} />
-                </TouchableOpacity>
-              </View>
-            </Camera>
-          </View>
-      ): (
+        <View style={styles.flex}>
+          <Camera
+            style={styles.flex}
+            type={type}
+            ref={(ref) => {
+              this.camera = ref;
+            }}
+          >
+            <View style={styles.topRow}>
+              <TouchableOpacity
+                style={styles.close}
+                onPress={() => {
+                  props.navigation.navigate("Leaderboard");
+                }}
+              >
+                <Ionicons name="md-close" style={styles.icons} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.bottomRow}>
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={() => {
+                  setFlash(
+                    flash === Camera.Constants.FlashMode.on
+                      ? Camera.Constants.FlashMode.off
+                      : Camera.Constants.FlashMode.on
+                  );
+                }}
+              >
+                <Ionicons
+                  name={
+                    flash === Camera.Constants.FlashMode.on
+                      ? "ios-flash"
+                      : "ios-flash-off"
+                  }
+                  style={styles.icons}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.touchable} onPress={photo}>
+                {isLoading ? (
+                  <ActivityIndicator size="small" />
+                ) : (
+                  <Ionicons name="md-camera" style={styles.icons} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.touchable}
+                onPress={() => {
+                  setType(
+                    type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back
+                  );
+                }}
+              >
+                <Ionicons name="md-reverse-camera" style={styles.icons} />
+              </TouchableOpacity>
+            </View>
+          </Camera>
+        </View>
+      ) : (
         <NavigationEvents
-                 onWillFocus={payload => {
-                     setIsFocused(true);
-                 }}
-                 onDidBlur={payload => {
-                     setIsFocused(false)
-                 }}
-             />
+          onWillFocus={(payload) => {
+            setIsFocused(true);
+          }}
+          onDidBlur={(payload) => {
+            setIsFocused(false);
+          }}
+        />
       )}
-    </View> 
+    </View>
   );
 };
 

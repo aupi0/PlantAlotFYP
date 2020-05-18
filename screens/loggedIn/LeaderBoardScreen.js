@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   ActivityIndicator,
   AsyncStorage,
   FlatList,
@@ -98,10 +97,7 @@ const LeaderBoardScreen = (props) => {
   if (error) {
     console.log(error);
     return (
-      <View style={styles.centered}>
-        <Text>It Appears an error occured!</Text>
-      </View>
-      /*<FlatList
+      <FlatList
         onRefresh={loadScoreBoard}
         refreshing={isRefreshing}
         data={errorMessage}
@@ -117,7 +113,7 @@ const LeaderBoardScreen = (props) => {
             />
           </View>
         )}
-      />*/
+      />
     );
   }
 

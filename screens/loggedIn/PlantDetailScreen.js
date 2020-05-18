@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Linking,
-} from "react-native";
-import { useSelector} from "react-redux";
+import { View, Text, Image, StyleSheet, Linking } from "react-native";
+import { useSelector } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import * as plantIDActions from "../../store/actions/plantID";
@@ -45,9 +39,7 @@ const PlantDetailScreen = (props) => {
       </Text>
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Plant Identification powered by</Text>
-        <Image
-          source={require("../../assets/plantIdLogo.png")}
-        />
+        <Image source={require("../../assets/plantIdLogo.png")} />
       </View>
     </View>
   );
@@ -75,7 +67,7 @@ PlantDetailScreen.navigationOptions = (navData) => {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1
+    flex: 1,
   },
   name: {
     fontSize: 25,
@@ -98,18 +90,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   logoContainer: {
-    width: '100%',
+    width: "100%",
     marginTop: 30,
     marginBottom: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 0
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 0,
   },
   logoText: {
     fontSize: 10,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });
 
 export default PlantDetailScreen;

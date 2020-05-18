@@ -6,11 +6,9 @@ export const SET_PLANTS = "SET_PLANTS";
 export const LOGOUT = "LOGOUT";
 
 export const identifyPlant = (image, latitude, longitude, userId) => {
-  console.log();
   return async () => {
     const userData = await AsyncStorage.getItem("userData");
     const jsonUserData = JSON.parse(userData);
-    console.log(image.base64.substring(0, 100));
     try {
       const response = await fetch(
         "http://api.sherlock.uk:5000/identify_plant",
@@ -50,7 +48,7 @@ export const identifyPlant = (image, latitude, longitude, userId) => {
 
       if (timeWasteData !== null) {
         if (resData.suggestions.length < 1) {
-          console.log("error: 0 suggestions");
+          throw new Error("error: 0 suggestions");
         } else {
           await savePlantToDatabase(
             userId,
@@ -85,23 +83,11 @@ const savePlantToDatabase = async (
   commonName,
   probability
 ) => {
-  console.log("inside savePlant to Database with userId: " + userId);
   const userData = await AsyncStorage.getItem("userData");
   const jsonUserData = JSON.parse(userData);
-
-  console.log("plantId = " + plantId);
-  console.log("plantName = " + plantName);
-  console.log("imageUrl = " + imageUrl);
-  console.log("latitude = " + latitude);
-  console.log("longitude = " + longitude);
-  console.log("plantInfoUrl = " + plantInfoUrl);
-  console.log("commonName = " + commonName);
-  console.log("probability = " + probability);
   try {
-    console.log("inside savePlantToDatabase");
     const date = new Date(dateTimeFound * 1000);
     const dateFormatted = date.toISOString().slice(0, 19).replace("T", " ");
-    console.log("dateTimeFOund = " + dateFormatted);
     const response = await fetch("http://api.sherlock.uk:5000/add_plant", {
       method: "POST",
       headers: {

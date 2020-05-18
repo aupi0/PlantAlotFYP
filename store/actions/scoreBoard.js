@@ -1,7 +1,6 @@
 import { AsyncStorage } from "react-native";
 
 export const SET_SCOREBOARD = "SET_SCOREBOARD";
-export const CLEAR_SCOREBOARD = "CLEAR_SCOREBOARD";
 export const LOGOUT = "LOGOUT";
 
 export const getScoreBoard = (userId) => {
@@ -46,7 +45,7 @@ export const getScoreBoard = (userId) => {
           type: SET_SCOREBOARD,
           scoreBoardData: resData,
           points: points,
-          position: position
+          position: position,
         });
       }
     } catch (err) {
@@ -59,5 +58,5 @@ export const getScoreBoard = (userId) => {
 export const logout = () => {
   return (dispatch) => {
     dispatch({ type: LOGOUT });
-  }
+  };
 };
