@@ -1,6 +1,5 @@
 import { AsyncStorage } from "react-native";
 
-export const REGISTER = "REGISTER";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
@@ -83,7 +82,7 @@ export const register = (name, email, password, confirmPassword) => {
 };
 
 export const login = (email, password) => {
-  return async (dispatch) => {
+  return async () => {
     const response = await fetch("http://api.sherlock.uk:5000/login", {
       method: "POST",
       headers: {
@@ -113,6 +112,7 @@ export const login = (email, password) => {
     const resData = await response.json();
     console.log(resData);
     saveTokenToStorage(resData.accessToken);
+    authenticate();
   };
 };
 
@@ -120,17 +120,13 @@ export const deleteUser = () => {
   return async (dispatch) => {
     const userData = await AsyncStorage.getItem("userData");
     const jsonUserData = JSON.parse(userData);
-    console.log("token: " + jsonUserData.token);
     try {
-      const response = await fetch(
-        "http://api.sherlock.uk:5000/delete_user",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: "Bearer " + jsonUserData.token,
-          },
-        }
-      );
+      const response = await fetch("http://api.sherlock.uk:5000/delete_user", {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + jsonUserData.token,
+        },
+      });
 
       if (!response.ok) {
         let message = "Something went wrong!";
@@ -149,7 +145,7 @@ export const deleteUser = () => {
       const resData = await response.json();
       console.log(resData);
 
-      await logout();
+      logout();
     } catch (err) {
       console.log(err);
       throw err;
@@ -157,9 +153,9 @@ export const deleteUser = () => {
   };
 };
 
-export const logout = (dispatch) => {
+export const logout = () => {
   AsyncStorage.removeItem("userData");
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: LOGOUT });
   };
 };

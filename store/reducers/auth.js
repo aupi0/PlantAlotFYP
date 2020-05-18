@@ -2,7 +2,7 @@ import { AUTHENTICATE, LOGOUT } from "../actions/auth";
 
 const initialState = {
   name: null,
-  userId: null
+  userId: null,
 };
 
 export default (state = initialState, action) => {
@@ -10,7 +10,7 @@ export default (state = initialState, action) => {
     case AUTHENTICATE:
       return {
         name: action.name,
-        userId: action.userId
+        userId: action.userId,
       };
     case LOGOUT:
       return initialState;

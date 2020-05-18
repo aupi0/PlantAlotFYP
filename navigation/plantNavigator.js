@@ -15,84 +15,86 @@ import AuthScreen from "../screens/anonymousUser/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Colours from "../constants/Colours";
 import * as authActions from "../store/actions/auth";
+import * as scoreBoardActions from "../store/actions/scoreBoard";
+import * as plantIDActions from "../store/actions/plantID";
 
 const defaultNavOptions = {
   headerStyle: {
-    backgroundColor: ""
+    backgroundColor: "",
   },
-  headerTintColor: Colours.primary
+  headerTintColor: Colours.primary,
 };
 
 const plantStackNavigator = createStackNavigator(
   {
     PlantsOverview: PlantsOverviewScreen,
-    PlantDetail:  PlantDetailScreen
+    PlantDetail: PlantDetailScreen,
   },
   {
-      defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: defaultNavOptions,
   }
 );
 
 const stackNavigator = createStackNavigator(
   {
-    LeaderBoard: LeaderBoardScreen
+    Leaderboard: LeaderBoardScreen,
   },
   {
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: defaultNavOptions,
   }
 );
 
 const PlantTabNavigator = createBottomTabNavigator(
   {
-    LeaderBoard: {
+    Leaderboard: {
       screen: stackNavigator,
       navigationOptions: {
-        tabBarIcon: tabInfo => {
+        tabBarIcon: (tabInfo) => {
           return (
             <Ionicons name="ios-stats" size={30} color={tabInfo.tintColor} />
           );
-        }
-      }
+        },
+      },
     },
     Camera: {
       screen: CameraScreen,
       navigationOptions: {
-        tabBarIcon: tabInfo => {
+        tabBarIcon: (tabInfo) => {
           return (
             <Ionicons name="md-camera" size={30} color={tabInfo.tintColor} />
           );
         },
-        tabBarVisible: false
-      }
+        tabBarVisible: false,
+      },
     },
-    'User\'s Plants': {
+    "User's Plants": {
       screen: plantStackNavigator,
       navigationOptions: {
-        tabBarIcon: tabInfo => {
+        tabBarIcon: (tabInfo) => {
           return (
             <Ionicons name="ios-leaf" size={30} color={tabInfo.tintColor} />
           );
-        }
-      }
-    }
+        },
+      },
+    },
   },
   {
     tabBarOptions: {
-      activeTintColor: Colours.primary
+      activeTintColor: Colours.primary,
     },
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: defaultNavOptions,
   }
 );
 
 const PlantDrawNavigator = createDrawerNavigator(
   {
-    LeaderBoard: PlantTabNavigator
+    Leaderboard: PlantTabNavigator,
   },
   {
     contentOptions: {
-      activeTintColor: Colours.primary
+      activeTintColor: Colours.primary,
     },
-    contentComponent: props => {
+    contentComponent: (props) => {
       const dispatch = useDispatch();
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
@@ -103,6 +105,8 @@ const PlantDrawNavigator = createDrawerNavigator(
               color={Colours.primary}
               onPress={() => {
                 dispatch(authActions.logout());
+                dispatch(plantIDActions.logout());
+                dispatch(scoreBoardActions.logout());
                 props.navigation.navigate("Auth");
               }}
             />
@@ -111,39 +115,47 @@ const PlantDrawNavigator = createDrawerNavigator(
               color={"red"}
               onPress={() => {
                 Alert.alert(
-                  'Are you sure you wish to delete your account?',
-                  'This can not be reversed',
+                  "Are you sure you wish to delete your account?",
+                  "This can not be reversed",
                   [
-                    {text: 'Cancel', onPress: () => console.log('Deleting Account Cancelled'), style: 'cancel'},
-                    {text: 'Delete', onPress: () => {
-                      dispatch(authActions.deleteUser())
-                      props.navigation.navigate("Auth")
-                    }, style: 'destructive'}
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Deleting Account Cancelled"),
+                      style: "cancel",
+                    },
+                    {
+                      text: "Delete",
+                      onPress: () => {
+                        dispatch(authActions.deleteUser());
+                        props.navigation.navigate("Auth");
+                      },
+                      style: "destructive",
+                    },
                   ],
                   { cancelable: false }
-                )
+                );
               }}
             />
           </SafeAreaView>
         </View>
       );
-    }
+    },
   }
 );
 
 const AuthNavigator = createStackNavigator(
   {
-    Auth: AuthScreen
+    Auth: AuthScreen,
   },
   {
-    defaultNavigationOptions: defaultNavOptions
+    defaultNavigationOptions: defaultNavOptions,
   }
 );
 
 const PlantLoginNavigator = createSwitchNavigator({
   Startup: StartupScreen,
   Auth: AuthNavigator,
-  Plant: PlantDrawNavigator
+  Plant: PlantDrawNavigator,
 });
 
 export default createAppContainer(PlantLoginNavigator);

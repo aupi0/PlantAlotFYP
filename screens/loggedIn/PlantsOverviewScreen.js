@@ -4,10 +4,9 @@ import {
   Text,
   Button,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  AsyncStorage
+  AsyncStorage,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -15,22 +14,44 @@ import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import PlantInstance from "../../components/plants/PlantInstance";
 import * as plantIDActions from "../../store/actions/plantID";
 import * as authActions from "../../store/actions/auth";
+import * as scoreBoardActions from "../../store/actions/scoreBoard";
 import Colors from "../../constants/Colours";
 import HeaderButton from "../../components/UI/HeaderButton";
 
-const PlantsOverviewScreen = props => {
+const PlantsOverviewScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
-  const userPlants = useSelector(state => state.plantID.userPlants);
+  const userPlants = useSelector((state) => state.plantID.userPlants);
+  const emptyMessage = [
+    { text: "No Plants found for this User. Maybe Try adding some!" },
+  ];
+  const errorMessage = [{ text: "It Appears an error occurred!" }];
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const tryAuth = async () => {
+      const userData = await AsyncStorage.getItem("userData");
+      if (!userData) {
+        props.navigation.navigate("Auth");
+        return;
+      } else {
+        try {
+          await dispatch(authActions.authenticate());
+        } catch (err) {
+          console.log(err);
+          props.navigation.navigate("Auth");
+        }
+      }
+    };
+    tryAuth();
+  }, [dispatch]);
 
   const loadPlants = useCallback(async () => {
     setError(null);
     setIsRefreshing(true);
     try {
-      await dispatch(plantIDActions.getUserPlants());
-      console.log("after getUserPlants");
+      dispatch(plantIDActions.getUserPlants());
     } catch (err) {
       setError(err.message);
       console.log(err.message);
@@ -47,44 +68,38 @@ const PlantsOverviewScreen = props => {
   }, [loadPlants]);
 
   useEffect(() => {
-    const tryAuth = async () => {
-      const userData = await AsyncStorage.getItem('userData');
-      if (!userData) {
-        props.navigation.navigate('Auth');
-        return;
-      } else {
-          try {
-            await dispatch(authActions.authenticate());
-          } catch (err) {
-            console.log(err);
-            props.navigation.navigate('Auth');
-          }
-      }
-    };
-    tryAuth();
-  }, [dispatch]);
-
-  useEffect(() => {
     setIsLoading(true);
     loadPlants().then(() => {
       setIsLoading(false);
     });
   }, [dispatch, loadPlants]);
 
-  const selectPlantHandler = (id, plantName) => {
+  const selectPlantHandler = (id) => {
     props.navigation.navigate("PlantDetail", {
       plantId: id,
-      plantName: plantName
     });
   };
 
   if (error) {
     console.log(error);
     return (
-      <View style={styles.centered}>
-        <Text>It Appears an error occurred!</Text>
-        <Button title="Try Again" onPress={loadPlants} color={Colors.primary} />
-      </View>
+      <FlatList
+        onRefresh={loadPlants}
+        refreshing={isRefreshing}
+        data={errorMessage}
+        keyExtractor={(item) => item.text}
+        contentContainerStyle={styles.centered}
+        renderItem={(itemData) => (
+          <View>
+            <Text>{itemData.item.text}</Text>
+            <Button
+              title="Try Again"
+              onPress={loadPlants}
+              color={Colors.primary}
+            />
+          </View>
+        )}
+      />
     );
   }
 
@@ -98,9 +113,14 @@ const PlantsOverviewScreen = props => {
 
   if (!isLoading && userPlants.length === 0) {
     return (
-      <View style={styles.centered}>
-        <Text>No Plants found for this User. Maybe Try adding some!</Text>
-      </View>
+      <FlatList
+        onRefresh={loadPlants}
+        refreshing={isRefreshing}
+        data={emptyMessage}
+        keyExtractor={(item) => item.text}
+        contentContainerStyle={styles.centered}
+        renderItem={(itemData) => <Text>{itemData.item.text}</Text>}
+      />
     );
   }
 
@@ -109,8 +129,8 @@ const PlantsOverviewScreen = props => {
       onRefresh={loadPlants}
       refreshing={isRefreshing}
       data={userPlants}
-      keyExtractor={item => item.plantId}
-      renderItem={itemData => (
+      keyExtractor={(item) => item.plantId}
+      renderItem={(itemData) => (
         <PlantInstance
           image={itemData.item.imageUrl}
           plantName={itemData.item.plantName}
@@ -119,23 +139,15 @@ const PlantsOverviewScreen = props => {
           longitude={itemData.item.longitude}
           dateTimeFound={itemData.item.dateTimeFound}
           onSelect={() => {
-            selectPlantHandler(itemData.item.plantId, itemData.item.plantName);
+            selectPlantHandler(itemData.item.plantId);
           }}
-        >
-          <Button
-            color={Colors.primary}
-            title="View Details"
-            onPress={() => {
-              selectPlantHandler(itemData.item.id, itemData.item.plantName);
-            }}
-          />
-        </PlantInstance>
+        ></PlantInstance>
       )}
     />
   );
 };
 
-PlantsOverviewScreen.navigationOptions = navData => {
+PlantsOverviewScreen.navigationOptions = (navData) => {
   return {
     headerTitle: "PlantAlot",
     headerLeft: () => (
@@ -156,11 +168,13 @@ PlantsOverviewScreen.navigationOptions = navData => {
           iconName={"ios-log-out"}
           onPress={() => {
             authActions.logout();
+            plantIDActions.logout();
+            scoreBoardActions.logout();
             navData.navigation.navigate("Auth");
           }}
         />
       </HeaderButtons>
-    )
+    ),
   };
 };
 
@@ -168,8 +182,8 @@ const styles = StyleSheet.create({
   centered: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
-  }
+    alignItems: "center",
+  },
 });
 
 export default PlantsOverviewScreen;
